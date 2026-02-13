@@ -1,8 +1,9 @@
 from django.db import models
+from django.utils.text import slugify
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=50, unique=True, blank=True)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.BooleanField(default=True)
@@ -12,6 +13,11 @@ class Product(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)[:50]
+            super().save(*args, **kwargs)
     
     class Meta:
         ordering = ['-created_at']
