@@ -5,10 +5,10 @@ from .models import Cart, CartItem
 class CartAdmin(admin.ModelAdmin):
     list_display = ('user', 'created_at',)
     search_fields = ('user__username',)
-    list_filter = ('created_at')
+    list_filter = ('created_at',)
     
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):
-    list_display = ('cart', 'product', 'quantity', 'price')
-    search_fields = ('cart__user__username', 'product__name')
+    list_display = ('cart', 'product', 'quantity', )
+    search_fields = ('cart__user__username', 'product__name',)
     list_filter = ('cart__created_at',)

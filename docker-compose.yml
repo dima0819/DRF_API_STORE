@@ -19,5 +19,18 @@ services:
     ports:
       - "6379:6379"
 
+  web:
+    build: .
+    container_name: store_web
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
 volumes:
   postgres_data:

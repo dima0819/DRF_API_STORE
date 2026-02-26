@@ -3,7 +3,7 @@ from .models import Product, Category
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'price', 'stock', 'created_at', 'updated_at', 'category')
+    list_display = ('id', 'name', 'slug', 'price', 'stock', 'created_at', 'updated_at', 'category')
     search_fields = ('name', 'category__name')
     list_filter = ('stock', 'created_at', 'updated_at', 'category')
     prepopulated_fields = {'slug': ('name',)}
@@ -11,5 +11,5 @@ class ProductAdmin(admin.ModelAdmin):
     
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description')
+    list_display = ('id', 'name', 'description')
     search_fields = ('name',)

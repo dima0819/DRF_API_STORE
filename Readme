@@ -1,0 +1,131 @@
+Important: This application is currently in active development — work in progress !!!
+
+
+DRF API Store
+=============
+
+Overview
+--------
+
+DRF API Store is a Django REST Framework-based backend for a simple online store. It provides endpoints for managing users, products, shopping carts, and orders. The project is intended as a clean, modular foundation for e-commerce functionality and learning purposes.
+
+
+Tech stack
+----------
+
+- Python 3.13 (or compatible)
+- Django 6.x
+- Django REST Framework
+
+Project structure
+-----------------
+
+- `users` — user models and auth-related views
+- `products` — product listing and detail endpoints
+- `cart` — shopping cart models and endpoints
+- `order` — order processing and management
+
+Prerequisites
+-------------
+
+- Docker and Docker Compose (v2+) to run the full stack in containers
+- Alternatively: Python 3.13, pip and a virtual environment to run locally
+
+Environment
+-----------
+
+Create a `.env` file in the project root with at least the following variables:
+
+- `SECRET_KEY` — Django secret key
+- `POSTGRES_DB` — Postgres database name
+- `POSTGRES_USER` — Postgres user
+- `POSTGRES_PASSWORD` — Postgres password
+- `POSTGRES_HOST` — usually `db` when using Docker Compose
+- `POSTGRES_PORT` — usually `5432`
+
+Docker usage
+------------------------------------
+
+1. Ensure you have a `.env` file configured (see "Environment" section).
+
+2. Build and start all services:
+
+```bash
+docker compose up --build -d
+```
+
+3. Run migrations inside the `web` container:
+
+```bash
+docker compose exec web python manage.py migrate
+```
+
+4. (Optional) Create a superuser:
+
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+
+5. The API will be available at `http://localhost:8000`.
+
+Notes:
+- The `web` service runs `gunicorn config.wsgi:application` on port `8000`.
+- The `db` service uses Postgres 15 and persists data in a Docker volume `postgres_data`.
+
+Docker + host (DB/Redis in Docker, app on host)
+---------------------------------------------
+
+If you prefer running the Django app on your host machine while using Docker for database and redis:
+
+```bash
+# start DB and Redis
+docker compose up -d db redis
+
+# on host, in your virtualenv
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
+Running locally without Docker
+-----------------------------
+
+1. Create and activate a virtual environment.
+2. Install dependencies:
+
+	pip install -r requirements.txt
+
+3. Configure your `.env` or environment variables.
+4. Apply migrations and run the server:
+
+	python manage.py migrate
+	python manage.py runserver
+
+API overview
+------------
+
+The API exposes endpoints grouped by app. The project mounts routes under `/api/v1/` in `config/urls.py`. Replace `localhost` with your host if different.
+
+- Product list (GET): http://localhost:8000/api/v1/store/
+- Product detail (GET/PUT/PATCH/DELETE): http://localhost:8000/api/v1/store/1/
+- Product categories (GET): http://localhost:8000/api/v1/store/categories/
+- Category detail (GET): http://localhost:8000/api/v1/store/categories/1/
+
+- View cart (GET/PUT): http://localhost:8000/api/v1/cart/
+- Cart detail (GET): http://localhost:8000/api/v1/cart/details/1/
+- Add item to cart (POST): http://localhost:8000/api/v1/cart/add_item/  (body: `product_id`, `quantity`)
+
+- List orders (GET) / Create order (POST): http://localhost:8000/api/v1/orders/order_list/
+- Order detail (GET): http://localhost:8000/api/v1/orders/order_detail/1/
+
+- Admin site (browser): http://localhost:8000/admin/
+
+Note: there are no project-wide auth routes shown in `config/urls.py`; if you add `users.urls` or register auth paths, update these examples accordingly.
+
+Testing
+-------
+
+Run the Django test suite:
+
+	python manage.py test
+
