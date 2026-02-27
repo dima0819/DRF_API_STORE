@@ -111,10 +111,11 @@ The API exposes endpoints grouped by app. The project mounts routes under `/api/
 - Product categories (GET): http://localhost:8000/api/v1/store/categories/
 - Category detail (GET): http://localhost:8000/api/v1/store/categories/1/
 
-- View cart (GET/PUT): http://localhost:8000/api/v1/cart/
-- Cart detail (GET): http://localhost:8000/api/v1/cart/details/1/
-- Add item to cart (POST): http://localhost:8000/api/v1/cart/add_item/  (body: `product_id`, `quantity`)
+- View cart (GET): http://localhost:8000/api/v1/carts/  (returns current user's cart; auth required)
+- Cart item detail (GET/PUT/PATCH/DELETE): http://localhost:8000/api/v1/carts/details/1/  (detail for a single cart item / product in the cart)
+- Add item to cart (POST): http://localhost:8000/api/v1/carts/add_item/  (body: `product_id`, `quantity`; auth required)
 
+Comming soon..
 - List orders (GET) / Create order (POST): http://localhost:8000/api/v1/orders/order_list/
 - Order detail (GET): http://localhost:8000/api/v1/orders/order_detail/1/
 
