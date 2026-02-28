@@ -107,13 +107,20 @@ API overview
 The API exposes endpoints grouped by app. The project mounts routes under `/api/v1/` in `config/urls.py`. Replace `localhost` with your host if different.
 
 - Product list (GET): http://localhost:8000/api/v1/store/
+![Product List](screenshots/product_list.png)
 - Product detail (GET/PUT/PATCH/DELETE): http://localhost:8000/api/v1/store/1/
+![Product Details](screenshots/product_details.png)
 - Product categories (GET): http://localhost:8000/api/v1/store/categories/
+![Categories List](sreenshots/categories_list.png)
 - Category detail (GET): http://localhost:8000/api/v1/store/categories/1/
+![Category Details](sreenshots/category_details.png)
 
 - View cart (GET): http://localhost:8000/api/v1/carts/  (returns current user's cart; auth required)
+![Cart List](sreenshots/cart_list.png)
 - Cart item detail (GET/PUT/PATCH/DELETE): http://localhost:8000/api/v1/carts/details/1/  (detail for a single cart item / product in the cart)
+![Cart Details](sreenshots/cart_details.png)
 - Add item to cart (POST): http://localhost:8000/api/v1/carts/add_item/  (body: `product_id`, `quantity`; auth required)
+![Cart Item Adding](sreenshots/cart_item_adding.png)
 
 Comming soon..
 - List orders (GET) / Create order (POST): http://localhost:8000/api/v1/orders/order_list/
