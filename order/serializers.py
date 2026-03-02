@@ -56,10 +56,11 @@ class OrderCreateSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     total_order_price = serializers.SerializerMethodField()
+    user_phone_number = serializers.ReadOnlyField(source='user.phone_number')
 
     class Meta:
         model = Order
-        fields = ['id', 'created_at', 'is_paid', 'address', 'items', 'total_order_price']
+        fields = ['id', 'created_at', 'is_paid', 'address', 'user_phone_number', 'items', 'total_order_price']
 
     def get_total_order_price(self, obj):
         return sum((item.total_price() for item in obj.items.all()), Decimal('0'))

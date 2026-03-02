@@ -121,13 +121,17 @@ The API exposes endpoints grouped by app. The project mounts routes under `/api/
 - Add item to cart (POST): http://localhost:8000/api/v1/carts/add_item/  (body: `product_id`, `quantity`; auth required)
 ![Cart Item Adding](screenshots/cart_item_adding.png)
 
-Comming soon..
-- List orders (GET) / Create order (POST): http://localhost:8000/api/v1/orders/order_list/
+
+- List orders (GET): http://localhost:8000/api/v1/orders/order_list/
+![Order List](screenshots/order_list.png)
 - Order detail (GET): http://localhost:8000/api/v1/orders/order_detail/1/
+![Order Detail](screenshots/order_detail.png)
+- Order create (POST): http://localhost:8000/api/v1/orders/order_create/
+![Order Create](screenshots/order_create.png)
 
 - Admin site (browser): http://localhost:8000/admin/
+![Admin Site](screenshots/admin_site.png)
 
-Note: there are no project-wide auth routes shown in `config/urls.py`; if you add `users.urls` or register auth paths, update these examples accordingly.
 
 Testing
 -------
