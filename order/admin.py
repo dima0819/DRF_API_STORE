@@ -11,6 +11,6 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'product', 'quantity', 'price',)
+    list_display = ('order', 'product', 'quantity', 'price', 'total_price',)
     search_fields = ('order__user__username', 'product__name',)
     list_filter = ('order__created_at',)

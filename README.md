@@ -1,5 +1,4 @@
-Important: This application is currently in active development — work in progress !!!
-
+> **Note:** Project is in active development — work in progress.
 
 DRF API Store
 =============
