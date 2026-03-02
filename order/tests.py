@@ -68,6 +68,21 @@ class OrderCreateTests(TestCase):
         self.assertIn('Cart is empty', str(resp.data))
         self.assertEqual(Order.objects.filter(user=self.user).count(), 0)
 
+    def test_create_order_fails_when_cart_does_not_exist(self):
+        self._auth()
+        # simulate user without cart
+        self.cart.delete()
+
+        resp = self.client.post(
+            '/api/v1/orders/order_create/',
+            {'address': 'Test address'},
+            format='json',
+        )
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('Cart is empty', str(resp.data))
+        self.assertEqual(Order.objects.filter(user=self.user).count(), 0)
+
     def test_create_order_fails_when_stock_not_enough(self):
         self._auth()
         # in cart user wants 10 units, and stock = 5

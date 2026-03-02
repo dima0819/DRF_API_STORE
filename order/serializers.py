@@ -34,7 +34,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         with transaction.atomic():
-            cart = Cart.objects.get(user=user)
+            cart, _ = Cart.objects.get_or_create(user=user)
             cart_items = cart.items.select_related('product').all()
             if not cart_items:
                 raise serializers.ValidationError("Cart is empty")
