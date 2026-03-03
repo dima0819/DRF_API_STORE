@@ -4,13 +4,13 @@ from .models import Order, OrderItem
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'created_at',)
+    list_display = ('id', 'user', 'created_at',)
     search_fields = ('user__username',)
     list_filter = ('created_at',)
 
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'product', 'quantity', 'price',)
+    list_display = ('order', 'product', 'quantity', 'price', 'total_price',)
     search_fields = ('order__user__username', 'product__name',)
     list_filter = ('order__created_at',)
