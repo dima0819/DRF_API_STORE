@@ -10,10 +10,16 @@ class CartItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = CartItem
-        fields = ['id', 'cart', 'product', 'quantity', 'total_price']
+        fields = ['id', 'product', 'quantity', 'total_price']
     
     def get_total_price(self, obj):
         return obj.get_total_price()
+    
+    
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Quantity must be greater than zero.")
+        return value
         
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, read_only=True)

@@ -1,3 +1,4 @@
+from cart.permissions import IsOwner
 from .serializers import CartSerializer, AddCartItemSerializer, CartItemSerializer
 from .models import Cart, CartItem
 from rest_framework import generics, status
@@ -8,7 +9,7 @@ from rest_framework.response import Response
 class CartListCreateView(generics.ListCreateAPIView):
     """List (single) and ensure cart exists for current user."""
     serializer_class = CartSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwner,]
 
     def get_queryset(self):
         return Cart.objects.filter(user=self.request.user)
@@ -20,14 +21,14 @@ class CartListCreateView(generics.ListCreateAPIView):
 
 class AddCartItemView(generics.CreateAPIView):
     serializer_class = AddCartItemSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwner,]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         cart, _ = Cart.objects.get_or_create(user=self.request.user)
         context['cart'] = cart
         return context
-
+    
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -38,7 +39,7 @@ class AddCartItemView(generics.CreateAPIView):
 
 class CartItemDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CartItemSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsOwner,]
 
     def get_queryset(self):
         return CartItem.objects.filter(cart__user=self.request.user)
