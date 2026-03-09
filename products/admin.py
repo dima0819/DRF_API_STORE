@@ -6,7 +6,6 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'price', 'stock', 'created_at', 'updated_at', 'category')
     search_fields = ('name', 'category__name')
     list_filter = ('stock', 'created_at', 'updated_at', 'category')
-    # Product no longer has a slug field
     
     
 @admin.register(Category)

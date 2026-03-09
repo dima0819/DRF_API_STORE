@@ -4,6 +4,10 @@ from .models import Order
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class OrderViewList(generics.ListAPIView):
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated,]
