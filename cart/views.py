@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class CartListCreateView(generics.ListCreateAPIView):
     """List (single) and ensure cart exists for current user."""
     serializer_class = CartSerializer
@@ -22,7 +23,6 @@ class CartListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
 class AddCartItemView(generics.CreateAPIView):
     serializer_class = AddCartItemSerializer
     permission_classes = [IsOwner,]

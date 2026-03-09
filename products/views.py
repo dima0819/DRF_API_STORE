@@ -29,6 +29,7 @@ class ProductViewDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAdminOrReadOnly]
     
+@method_decorator(cache_page(60 * 15), name='dispatch')    
 class CategoryViewList(generics.ListCreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
