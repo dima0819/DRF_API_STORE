@@ -9,7 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 60 * 24), name='dispatch')
 class CartListCreateView(generics.ListCreateAPIView):
     """List (single) and ensure cart exists for current user."""
     serializer_class = CartSerializer
