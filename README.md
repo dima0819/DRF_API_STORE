@@ -1,12 +1,10 @@
-> **Note:** Project is in active development — work in progress.
-
 DRF API Store
 =============
 
 Overview
 --------
 
-DRF API Store is a Django REST Framework-based backend for a simple online store. It provides endpoints for managing users, products, shopping carts, and orders. The project is intended as a clean, modular foundation for e-commerce functionality and learning purposes.
+DRF API Store is a Django REST Framework-based backend for a online store. It provides endpoints for managing users, products, shopping carts, and orders. The project is intended as a clean, modular foundation for e-commerce functionality.
 
 
 Tech stack
@@ -15,6 +13,8 @@ Tech stack
 - Python 3.13 (or compatible)
 - Django 6.x
 - Django REST Framework
+ - Celery for asynchronou, background tasks
+ - Redis as Celery broker and cache
 
 Project structure
 -----------------
@@ -52,6 +52,13 @@ Docker usage
 ```bash
 docker compose up --build -d
 ```
+
+To run the Celery worker (if not started as a separate service), exec into the running container and start Celery:
+
+```bash
+docker compose exec web celery -A config worker --loglevel=info
+```
+
 
 3. Run migrations inside the `web` container:
 
@@ -113,6 +120,9 @@ The API exposes endpoints grouped by app. The project mounts routes under `/api/
 ![Categories List](screenshots/categories_list.png)
 - Category detail (GET): http://localhost:8000/api/v1/store/categories/1/
 ![Category Details](screenshots/category_details.png)
+
+- Register (POST): http://localhost:8000/api/v1/users/register/
+![Register](screenshots/register.png)
 
 - View cart (GET): http://localhost:8000/api/v1/carts/  (returns current user's cart; auth required)
 ![Cart List](screenshots/cart_list.png)
