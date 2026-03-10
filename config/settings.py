@@ -4,11 +4,6 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -83,6 +78,10 @@ CACHES = {
         }
     }
 }
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0' # <-- DB nr: 0 
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0' # <-- DB nr: 0 
+
 
 
 
@@ -184,15 +183,23 @@ SIMPLE_JWT = {
 }
 
 
-LOGGING = {
-    'version': 1,
-    'handlers': {
-        'console': {'class': 'logging.StreamHandler'},
-    },
-    'loggers': {
-        'django.db.backends': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'handlers': {
+#         'console': {'class': 'logging.StreamHandler'},
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'level': 'DEBUG',
+#             'handlers': ['console'],
+#         },
+#     },
+# }
+
+# Email configuration
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')

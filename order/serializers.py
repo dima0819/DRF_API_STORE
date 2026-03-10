@@ -3,6 +3,7 @@ from rest_framework import serializers
 from .models import Order, OrderItem
 from cart.models import Cart
 from decimal import Decimal
+from .tasks import send_order_confirmation_email
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.ReadOnlyField(source='product.name')
@@ -17,9 +18,10 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderCreateSerializer(serializers.ModelSerializer):
     user_phone_number = serializers.ReadOnlyField(source='user.phone_number')
+    user_email = serializers.ReadOnlyField(source='user.email')
     class Meta:
         model = Order
-        fields = ['id', 'created_at', 'is_paid', 'address', 'user_phone_number']
+        fields = ['id', 'created_at', 'is_paid', 'address', 'user_phone_number', 'user_email']
         
     def validate_address(self, value):
         if not value:
@@ -51,7 +53,8 @@ class OrderCreateSerializer(serializers.ModelSerializer):
                 item.product.stock -= item.quantity
                 item.product.save()
             cart.items.all().delete()
-            return order
+        send_order_confirmation_email.delay(order.id, user.email)  # <-- Celery task to send email asynchronously
+        return order
     
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
