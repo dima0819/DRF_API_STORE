@@ -53,17 +53,12 @@ Docker usage
 docker compose up --build -d
 ```
 
+The `web` container runs an entrypoint that applies migrations and collects static files automatically on startup, so manual migration is not required after bringing the stack up.
+
 To run the Celery worker (if not started as a separate service), exec into the running container and start Celery:
 
 ```bash
 docker compose exec web celery -A config worker --loglevel=info
-```
-
-
-3. Run migrations inside the `web` container:
-
-```bash
-docker compose exec web python manage.py migrate
 ```
 
 4. (Optional) Create a superuser:
@@ -79,7 +74,6 @@ Notes:
 - The `db` service uses Postgres 15 and persists data in a Docker volume `postgres_data`.
 
 Docker + host (DB/Redis in Docker, app on host)
----------------------------------------------
 
 If you prefer running the Django app on your host machine while using Docker for database and redis:
 
