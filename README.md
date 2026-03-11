@@ -96,7 +96,7 @@ docker compose exec web celery -A config worker --loglevel=info
 docker compose exec web python manage.py createsuperuser
 ```
 
-5. The API will be available at `http://localhost:8000`.
+5. The API will be available at `http://127.0.0.1:8000`.
 
 Notes:
 - The `web` service runs `gunicorn config.wsgi:application` on port `8000`.
