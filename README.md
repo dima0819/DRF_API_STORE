@@ -28,6 +28,35 @@ Prerequisites
 -------------
 
 - Docker and Docker Compose (v2+) to run the full stack in containers
+
+Quick Start with Docker
+-----------------------
+
+1. Ensure you have Docker and Docker Compose installed
+2. Create a `.env` file with required environment variables (see `.env` in project)
+3. Run the full stack:
+
+   ```bash
+   docker compose up --build -d
+   ```
+
+4. After containers start, access the application:
+   - **DRF API Browser**: http://localhost:8000/
+   - **Admin Panel**: http://localhost:8000/admin/ (default credentials: admin/admin)
+   - **API Endpoints**: http://localhost:8000/api/v1/store/, /api/v1/orders/, etc.
+
+5. Check services health:
+   ```bash
+   docker compose ps
+   ```
+
+Available Services
+------------------
+
+- **web**: Django + Gunicorn (main API) - Port 8000
+- **celery**: Celery worker for background tasks
+- **redis**: Redis cache and Celery broker - Port 6379
+- **db**: PostgreSQL database - Port 5432
 - Alternatively: Python 3.13, pip and a virtual environment to run locally
 
 Environment
