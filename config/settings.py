@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
 from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -10,24 +10,46 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 'web', '*']
+# In production set ALLOWED_HOSTS in .env to your real host(s), e.g.
+# ALLOWED_HOSTS=sklep.mojadomena.pl,www.sklep.mojadomena.pl
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='127.0.0.1,localhost,0.0.0.0,web',
+    cast=Csv(),
+)
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-]
+# Front-end origins allowed to call the API cross-origin. In production add
+# your public domain, e.g. CORS_ALLOWED_ORIGINS=https://sklep.mojadomena.pl
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://127.0.0.1:3000',
+    cast=Csv(),
+)
 CORS_ALLOW_CREDENTIALS = True
 
-# Needed for POST forms (e.g. Django admin) accessed through the nginx
-# frontend proxy on port 3000.
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-]
+# Origins trusted for unsafe (POST/PUT/…) requests — e.g. Django admin behind
+# the nginx proxy. In production add your public origin(s) via .env.
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+    cast=Csv(),
+)
+
+# Hardening applied only when DEBUG is off (i.e. in production). Behind an
+# HTTPS-terminating reverse proxy the app receives plain HTTP, so trust the
+# X-Forwarded-Proto header to detect the original scheme.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Redirect HTTP->HTTPS. Turn off (SECURE_SSL_REDIRECT=False in .env) only
+    # if you deliberately serve plain HTTP inside a trusted LAN.
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=60 * 60 * 24 * 30, cast=int)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
 
 
 # Application definition
