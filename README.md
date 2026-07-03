@@ -4,7 +4,7 @@ DRF API Store
 Overview
 --------
 
-DRF API Store is a Django REST Framework-based backend for a online store. It provides endpoints for managing users, products, shopping carts, and orders. The project is intended as a clean, modular foundation for e-commerce functionality.
+DRF API Store is a full-stack sports equipment store: a Django REST Framework backend (users, products, carts, orders) plus a React (Vite + TypeScript + Tailwind + framer-motion) storefront in `frontend/`.
 
 
 Tech stack
@@ -13,8 +13,9 @@ Tech stack
 - Python 3.13 (or compatible)
 - Django 6.x
 - Django REST Framework
- - Celery for asynchronou, background tasks
- - Redis as Celery broker and cache
+- Celery for asynchronous, background tasks
+- Redis as Celery broker and cache
+- React 19 + Vite + TypeScript + Tailwind CSS (frontend, served by nginx in Docker)
 
 Project structure
 -----------------
@@ -23,6 +24,7 @@ Project structure
 - `products` — product listing and detail endpoints
 - `cart` — shopping cart models and endpoints
 - `order` — order processing and management
+- `frontend` — React storefront (SPA); nginx proxies `/api`, `/admin` and `/static` to Django
 
 Prerequisites
 -------------
@@ -41,9 +43,13 @@ Quick Start with Docker
    ```
 
 4. After containers start, access the application:
+   - **Store frontend (SPA)**: http://localhost:3000/
    - **DRF API Browser**: http://localhost:8000/
-   - **Admin Panel**: http://localhost:8000/admin/ (default credentials: admin/admin)
+   - **Admin Panel**: http://localhost:8000/admin/ (also reachable via http://localhost:3000/admin/)
    - **API Endpoints**: http://localhost:8000/api/v1/store/, /api/v1/orders/, etc.
+
+   On startup the `web` container applies migrations and seeds demo
+   categories/products (idempotent `seed_sports_store` command).
 
 5. Check services health:
    ```bash
@@ -53,7 +59,8 @@ Quick Start with Docker
 Available Services
 ------------------
 
-- **web**: Django + Gunicorn (main API) - Port 8000
+- **frontend**: React SPA served by nginx - Port 3000 (proxies API calls to `web`)
+- **web**: Django (main API) - Port 8000
 - **celery**: Celery worker for background tasks
 - **redis**: Redis cache and Celery broker - Port 6379
 - **db**: PostgreSQL database - Port 5432
@@ -166,10 +173,29 @@ The API exposes endpoints grouped by app. The project mounts routes under `/api/
 ![Admin Site](screenshots/admin_site.png)
 
 
+Frontend development
+--------------------
+
+For local development with hot reload (backend on :8000, e.g. via
+`docker compose up -d db redis web`):
+
+	cd frontend
+	npm install
+	npm run dev
+
+The dev server runs on http://localhost:5173 and proxies `/api` to
+`http://127.0.0.1:8000` (see `frontend/vite.config.ts`).
+
 Testing
 -------
 
-Run the Django test suite:
+Run the Django test suite (uses SQLite/locmem in test mode — no Postgres,
+Redis or SMTP needed):
 
 	python manage.py test
+
+Run the frontend tests (Vitest + React Testing Library):
+
+	cd frontend
+	npm test
 

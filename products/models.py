@@ -31,5 +31,7 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)[:50]
+            # slugify drops 'ł' entirely ("Piłki" -> "piki"), so map it first
+            ascii_name = self.name.replace('ł', 'l').replace('Ł', 'L')
+            self.slug = slugify(ascii_name)[:50]
         super().save(*args, **kwargs)

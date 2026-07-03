@@ -66,4 +66,15 @@ class AddCartItemSerializer(serializers.ModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("Quantity must be greater than zero.")
         return value
+
+    def validate(self, attrs):
+        product = Product.objects.get(pk=attrs['product_id'])
+        cart = self.context['cart']
+        existing = CartItem.objects.filter(cart=cart, product=product).first()
+        requested = attrs['quantity'] + (existing.quantity if existing else 0)
+        if requested > product.stock:
+            raise serializers.ValidationError(
+                f"Niewystarczający stan magazynowy: dostępne {product.stock} szt."
+            )
+        return attrs
     

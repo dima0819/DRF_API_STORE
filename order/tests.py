@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.core import mail
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -54,6 +55,23 @@ class OrderCreateTests(TestCase):
         self.assertEqual(self.product.stock, 3)
         # cart cleared
         self.assertFalse(self.cart.items.exists())
+
+    def test_create_order_sends_confirmation_email(self):
+        """Celery runs eagerly in tests, so the email lands in mail.outbox."""
+        self._auth()
+        CartItem.objects.create(cart=self.cart, product=self.product, quantity=1)
+
+        resp = self.client.post(
+            '/api/v1/orders/order_create/',
+            {'address': 'Test address'},
+            format='json',
+        )
+
+        self.assertEqual(resp.status_code, 201)
+        self.assertEqual(len(mail.outbox), 1)
+        order = Order.objects.get(user=self.user)
+        self.assertIn(str(order.id), mail.outbox[0].subject)
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
     def test_create_order_fails_when_cart_empty(self):
         self._auth()

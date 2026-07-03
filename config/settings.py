@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
@@ -7,9 +8,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 'web', '*']
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# Needed for POST forms (e.g. Django admin) accessed through the nginx
+# frontend proxy on port 3000.
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 
 
 # Application definition
@@ -21,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework_simplejwt',
     'rest_framework',
     'users',
@@ -31,6 +50,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -141,7 +161,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
@@ -207,3 +227,21 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+
+# Test settings: run the suite without external services
+# (PostgreSQL, Redis, Celery broker, SMTP).
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
+    }
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+    CELERY_TASK_ALWAYS_EAGER = True
+    EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
+    PASSWORD_HASHERS = ['django.contrib.auth.hashers.MD5PasswordHasher']
