@@ -34,6 +34,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
+      - static_data:/app/staticfiles
     env_file:
       - .env
     ports:
@@ -69,6 +70,8 @@ services:
     build: ./frontend
     container_name: store_frontend
     restart: always
+    volumes:
+      - static_data:/var/www/static:ro
     ports:
       - "3000:80"
     depends_on:
@@ -76,3 +79,4 @@ services:
 
 volumes:
   postgres_data:
+  static_data:
