@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function RegisterPage() {
   const { register, error, clearError } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
@@ -45,15 +47,13 @@ export default function RegisterPage() {
         <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500/15">
           <UserPlus className="h-6 w-6 text-brand-400" />
         </div>
-        <h1 className="text-2xl font-bold text-white">Utwórz konto</h1>
-        <p className="mt-2 text-sm text-gray-400">
-          Rejestracja jest wymagana tylko do koszyka i zamówień
-        </p>
+        <h1 className="text-2xl font-bold text-white">{t('register.title')}</h1>
+        <p className="mt-2 text-sm text-gray-400">{t('register.subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-gray-400 mb-1.5">Imię</label>
+              <label htmlFor="first_name" className="block text-sm font-medium text-gray-400 mb-1.5">{t('register.firstName')}</label>
               <input
                 id="first_name"
                 value={form.first_name}
@@ -64,7 +64,7 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-gray-400 mb-1.5">Nazwisko</label>
+              <label htmlFor="last_name" className="block text-sm font-medium text-gray-400 mb-1.5">{t('register.lastName')}</label>
               <input
                 id="last_name"
                 value={form.last_name}
@@ -76,7 +76,7 @@ export default function RegisterPage() {
             </div>
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1.5">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1.5">{t('login.email')}</label>
             <input
               id="email"
               type="email"
@@ -88,7 +88,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label htmlFor="phone_number" className="block text-sm font-medium text-gray-400 mb-1.5">Telefon</label>
+            <label htmlFor="phone_number" className="block text-sm font-medium text-gray-400 mb-1.5">{t('register.phone')}</label>
             <input
               id="phone_number"
               type="tel"
@@ -101,7 +101,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1.5">Hasło</label>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1.5">{t('login.password')}</label>
             <input
               id="password"
               type="password"
@@ -121,14 +121,14 @@ export default function RegisterPage() {
           )}
 
           <Button type="submit" loading={loading} className="w-full">
-            Zarejestruj się
+            {t('register.submit')}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          Masz już konto?{' '}
+          {t('register.haveAccount')}{' '}
           <Link to="/logowanie" className="font-medium text-brand-400 hover:text-brand-300">
-            Zaloguj się
+            {t('register.loginLink')}
           </Link>
         </p>
       </motion.div>

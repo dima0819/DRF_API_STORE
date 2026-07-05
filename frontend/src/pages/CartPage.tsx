@@ -6,10 +6,12 @@ import Button from '../components/Button'
 import { getProductImage, slugifyCategoryName } from '../config/categories'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function CartPage() {
   const { isAuthenticated } = useAuth()
   const { cart, isLoading, updateQuantity, removeItem } = useCart()
+  const { t } = useLanguage()
   const navigate = useNavigate()
 
   if (!isAuthenticated) {
@@ -21,20 +23,18 @@ export default function CartPage() {
           className="rounded-2xl border border-brand-500/10 bg-surface-card p-12"
         >
           <ShoppingBag className="mx-auto h-16 w-16 text-brand-500/50" />
-          <h1 className="mt-6 text-2xl font-bold text-white">Twój koszyk jest pusty</h1>
-          <p className="mt-3 text-gray-400">
-            Zaloguj się, aby dodawać produkty do koszyka i składać zamówienia.
-          </p>
+          <h1 className="mt-6 text-2xl font-bold text-white">{t('cart.guestTitle')}</h1>
+          <p className="mt-3 text-gray-400">{t('cart.guestText')}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button onClick={() => navigate('/logowanie', { state: { from: '/koszyk' } })}>
-              Zaloguj się
+              {t('cart.login')}
             </Button>
             <Button variant="secondary" onClick={() => navigate('/rejestracja')}>
-              Utwórz konto
+              {t('cart.createAccount')}
             </Button>
           </div>
           <Link to="/" className="mt-6 inline-block text-sm text-brand-400 hover:text-brand-300">
-            ← Kontynuuj zakupy bez logowania
+            {t('cart.continueGuest')}
           </Link>
         </motion.div>
       </div>
@@ -64,10 +64,10 @@ export default function CartPage() {
           className="rounded-2xl border border-brand-500/10 bg-surface-card p-12"
         >
           <ShoppingBag className="mx-auto h-16 w-16 text-brand-500/50" />
-          <h1 className="mt-6 text-2xl font-bold text-white">Koszyk jest pusty</h1>
-          <p className="mt-3 text-gray-400">Dodaj produkty z katalogu, aby rozpocząć zakupy.</p>
+          <h1 className="mt-6 text-2xl font-bold text-white">{t('cart.emptyTitle')}</h1>
+          <p className="mt-3 text-gray-400">{t('cart.emptyText')}</p>
           <Button className="mt-8" onClick={() => navigate('/')}>
-            Przeglądaj produkty
+            {t('cart.browseProducts')}
           </Button>
         </motion.div>
       </div>
@@ -77,7 +77,7 @@ export default function CartPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <h1 className="text-3xl font-bold text-white">
-        Koszyk <span className="text-brand-400">({items.length})</span>
+        {t('cart.title')} <span className="text-brand-400">({items.length})</span>
       </h1>
 
       <div className="mt-8 space-y-4">
@@ -119,7 +119,7 @@ export default function CartPage() {
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       className="flex h-9 w-9 items-center justify-center text-gray-400 hover:text-white"
-                      aria-label="Zmniejsz ilość"
+                      aria-label={t('product.decrease')}
                     >
                       <Minus className="h-3.5 w-3.5" />
                     </button>
@@ -128,7 +128,7 @@ export default function CartPage() {
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={item.quantity >= item.product.stock}
                       className="flex h-9 w-9 items-center justify-center text-gray-400 hover:text-white disabled:opacity-40"
-                      aria-label="Zwiększ ilość"
+                      aria-label={t('product.increase')}
                     >
                       <Plus className="h-3.5 w-3.5" />
                     </button>
@@ -141,7 +141,7 @@ export default function CartPage() {
                   <button
                     onClick={() => removeItem(item.id)}
                     className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
-                    aria-label="Usuń"
+                    aria-label={t('product.remove')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -158,13 +158,13 @@ export default function CartPage() {
         className="mt-8 rounded-2xl border border-brand-500/15 bg-surface-card p-6"
       >
         <div className="flex items-center justify-between">
-          <span className="text-lg text-gray-400">Razem</span>
+          <span className="text-lg text-gray-400">{t('cart.total')}</span>
           <span className="text-2xl font-bold text-brand-400">
             {formatPrice(cart?.total_cart_price ?? '0')}
           </span>
         </div>
         <Button className="mt-6 w-full" onClick={() => navigate('/checkout')}>
-          Przejdź do zamówienia
+          {t('cart.checkout')}
         </Button>
       </motion.div>
     </div>

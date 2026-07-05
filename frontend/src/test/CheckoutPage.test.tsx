@@ -1,7 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import CheckoutPage, { composeAddress, validateAddress } from '../pages/CheckoutPage'
+import CheckoutPage, {
+  composeAddress,
+  formatPostalCode,
+  validateAddress,
+} from '../pages/CheckoutPage'
 import { Providers } from './utils'
 import { authenticate, makeCart, makeOrder } from './fixtures'
 import { fetchCart } from '../api/cart'
@@ -62,6 +66,28 @@ describe('composeAddress', () => {
     expect(composeAddress({ ...base, recipient: '  Jan Kowalski  ', city: ' Warszawa ' })).toBe(
       'Jan Kowalski, ul. Sportowa 12/3, 00-001 Warszawa',
     )
+  })
+})
+
+describe('formatPostalCode', () => {
+  it('inserts the dash automatically after two digits', () => {
+    expect(formatPostalCode('0')).toBe('0')
+    expect(formatPostalCode('00')).toBe('00')
+    expect(formatPostalCode('000')).toBe('00-0')
+    expect(formatPostalCode('00001')).toBe('00-001')
+  })
+
+  it('keeps an already formatted code unchanged', () => {
+    expect(formatPostalCode('00-001')).toBe('00-001')
+  })
+
+  it('strips non-digit characters', () => {
+    expect(formatPostalCode('00a00b1')).toBe('00-001')
+    expect(formatPostalCode('00 001')).toBe('00-001')
+  })
+
+  it('caps the value at five digits', () => {
+    expect(formatPostalCode('123456789')).toBe('12-345')
   })
 })
 
@@ -141,6 +167,29 @@ describe('CheckoutPage', () => {
       'Jan Kowalski, ul. Sportowa 12/3, 00-001 Warszawa',
     )
     expect(screen.getByText(/#7/)).toBeInTheDocument()
+  })
+
+  it('accepts a postal code typed without a dash (numeric mobile keyboard)', async () => {
+    authenticate()
+    const user = userEvent.setup()
+    vi.mocked(fetchCart).mockResolvedValue(makeCart())
+    vi.mocked(createOrder).mockResolvedValue(makeOrder({ id: 8 }))
+
+    renderCheckout()
+    await screen.findByText('Podsumowanie')
+
+    await user.type(screen.getByLabelText('Imię i nazwisko odbiorcy'), 'Jan Kowalski')
+    await user.type(screen.getByLabelText('Ulica'), 'Sportowa')
+    await user.type(screen.getByLabelText('Nr domu / lokalu'), '12/3')
+    await user.type(screen.getByLabelText('Kod pocztowy'), '00001')
+    expect(screen.getByLabelText('Kod pocztowy')).toHaveValue('00-001')
+    await user.type(screen.getByLabelText('Miasto'), 'Warszawa')
+    await user.click(screen.getByRole('button', { name: 'Złóż zamówienie' }))
+
+    expect(await screen.findByText('Zamówienie złożone!')).toBeInTheDocument()
+    expect(createOrder).toHaveBeenCalledWith(
+      'Jan Kowalski, ul. Sportowa 12/3, 00-001 Warszawa',
+    )
   })
 
   it('blocks submission and shows an error for an invalid postal code', async () => {

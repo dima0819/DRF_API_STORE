@@ -3,6 +3,7 @@ __pycache__/
 .pytest_cache/
 *.sqlite3
 env/
+.venv/
 .DS_Store
 .env
 staticfiles/

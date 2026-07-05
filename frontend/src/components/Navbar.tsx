@@ -4,10 +4,36 @@ import { LogOut, Menu, ShoppingBag, User, X } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useLanguage } from '../context/LanguageContext'
+import type { Lang } from '../i18n/translations'
+
+function LanguageSwitcher() {
+  const { lang, setLang } = useLanguage()
+  const options: Lang[] = ['pl', 'en']
+
+  return (
+    <div className="flex items-center rounded-xl bg-surface-elevated p-1">
+      {options.map((option) => (
+        <button
+          key={option}
+          onClick={() => setLang(option)}
+          className={`rounded-lg px-2.5 py-1 text-xs font-bold uppercase transition-colors ${
+            lang === option
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-400 hover:text-white'
+          }`}
+        >
+          {option}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 export default function Navbar() {
   const { isAuthenticated, logout } = useAuth()
   const { itemCount } = useCart()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -22,25 +48,26 @@ export default function Navbar() {
             <ShoppingBag className="h-5 w-5 text-white" />
           </div>
           <span className="text-xl font-bold">
-            Sport<span className="gradient-text">Store</span>
+            Motion<span className="gradient-text">Gear</span>
           </span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
           <NavLink to="/" className={navLinkClass} end>
-            Strona główna
+            {t('nav.home')}
           </NavLink>
           <NavLink to="/koszyk" className={navLinkClass}>
-            Koszyk
+            {t('nav.cart')}
           </NavLink>
           {isAuthenticated && (
             <NavLink to="/zamowienia" className={navLinkClass}>
-              Zamówienia
+              {t('nav.orders')}
             </NavLink>
           )}
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
+          <LanguageSwitcher />
           <Link
             to="/koszyk"
             className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-surface-elevated text-gray-300 transition-colors hover:text-brand-400"
@@ -66,7 +93,7 @@ export default function Navbar() {
               className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-gray-400 transition-colors hover:text-red-400"
             >
               <LogOut className="h-4 w-4" />
-              Wyloguj
+              {t('nav.logout')}
             </button>
           ) : (
             <>
@@ -74,25 +101,28 @@ export default function Navbar() {
                 to="/logowanie"
                 className="rounded-xl px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:text-white"
               >
-                Zaloguj
+                {t('nav.login')}
               </Link>
               <Link
                 to="/rejestracja"
                 className="rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand-500/25 transition-all hover:bg-brand-400"
               >
-                Rejestracja
+                {t('nav.register')}
               </Link>
             </>
           )}
         </div>
 
-        <button
-          className="md:hidden text-gray-300"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Menu"
-        >
-          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-3 md:hidden">
+          <LanguageSwitcher />
+          <button
+            className="text-gray-300"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Menu"
+          >
+            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </nav>
 
       {mobileOpen && (
@@ -103,15 +133,15 @@ export default function Navbar() {
         >
           <div className="flex flex-col gap-3">
             <NavLink to="/" className={navLinkClass} onClick={() => setMobileOpen(false)} end>
-              Strona główna
+              {t('nav.home')}
             </NavLink>
             <NavLink to="/koszyk" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-              Koszyk {itemCount > 0 && `(${itemCount})`}
+              {t('nav.cart')} {itemCount > 0 && `(${itemCount})`}
             </NavLink>
             {isAuthenticated ? (
               <>
                 <NavLink to="/zamowienia" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                  Zamówienia
+                  {t('nav.orders')}
                 </NavLink>
                 <button
                   onClick={() => {
@@ -121,16 +151,16 @@ export default function Navbar() {
                   }}
                   className="flex items-center gap-2 text-sm text-red-400"
                 >
-                  <LogOut className="h-4 w-4" /> Wyloguj
+                  <LogOut className="h-4 w-4" /> {t('nav.logout')}
                 </button>
               </>
             ) : (
               <>
                 <Link to="/logowanie" className="flex items-center gap-2 text-sm text-gray-300" onClick={() => setMobileOpen(false)}>
-                  <User className="h-4 w-4" /> Zaloguj
+                  <User className="h-4 w-4" /> {t('nav.login')}
                 </Link>
                 <Link to="/rejestracja" className="text-sm font-semibold text-brand-400" onClick={() => setMobileOpen(false)}>
-                  Rejestracja
+                  {t('nav.register')}
                 </Link>
               </>
             )}

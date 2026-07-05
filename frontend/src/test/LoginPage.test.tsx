@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { AuthProvider } from '../context/AuthContext'
+import { LanguageProvider } from '../context/LanguageContext'
 import { CartProvider } from '../context/CartContext'
 import { ToastProvider } from '../context/ToastContext'
 import LoginPage from '../pages/LoginPage'
@@ -27,16 +28,18 @@ vi.mock('../api/cart', () => ({
 function renderLogin() {
   return render(
     <MemoryRouter initialEntries={['/logowanie']}>
-      <AuthProvider>
-        <ToastProvider>
-          <CartProvider>
-            <Routes>
-              <Route path="/" element={<div>STRONA GŁÓWNA</div>} />
-              <Route path="/logowanie" element={<LoginPage />} />
-            </Routes>
-          </CartProvider>
-        </ToastProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <CartProvider>
+              <Routes>
+                <Route path="/" element={<div>STRONA GŁÓWNA</div>} />
+                <Route path="/logowanie" element={<LoginPage />} />
+              </Routes>
+            </CartProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </MemoryRouter>,
   )
 }

@@ -1,201 +1,165 @@
-DRF API Store
-=============
+# MotionGear 🏋️
 
-Overview
---------
+Full-stack sports equipment store: a Django REST Framework backend (users, products, carts, orders) with a React storefront.
 
-DRF API Store is a full-stack sports equipment store: a Django REST Framework backend (users, products, carts, orders) plus a React (Vite + TypeScript + Tailwind + framer-motion) storefront in `frontend/`.
+**Live demo:** [https://motiongear.duckdns.org](https://motiongear.duckdns.org)
 
+## Features
 
-Tech stack
-----------
+- 🛍️ Product catalog with categories, search and product photos
+- 🛒 Per-user shopping cart with quantity management and stock validation
+- 📦 Order checkout with a structured delivery address form (auto-formatted Polish postal code, mobile-friendly)
+- ✉️ Asynchronous order confirmation emails (Celery + Redis)
+- 🔐 JWT authentication (register / login / token refresh)
+- 🌍 Language switcher: Polish / English
+- 📱 Responsive UI with animations (Tailwind CSS + framer-motion)
+- ⚡ Redis caching of product listings
+- 🐳 One-command Docker Compose setup with demo data seeding
 
-- Python 3.13 (or compatible)
-- Django 6.x
-- Django REST Framework
-- Celery for asynchronous, background tasks
-- Redis as Celery broker and cache
-- React 19 + Vite + TypeScript + Tailwind CSS (frontend, served by nginx in Docker)
+## Tech stack
 
-Project structure
------------------
+| Layer    | Technology |
+|----------|------------|
+| Backend  | Python 3.13, Django 6, Django REST Framework, SimpleJWT |
+| Async    | Celery, Redis (broker + cache) |
+| Database | PostgreSQL 15 |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS 4, framer-motion |
+| Serving  | gunicorn + nginx (nginx proxies `/api`, `/admin`, `/static` to Django) |
+| Tests    | Django test runner, Vitest + React Testing Library |
 
-- `users` — user models and auth-related views
-- `products` — product listing and detail endpoints
-- `cart` — shopping cart models and endpoints
-- `order` — order processing and management
-- `frontend` — React storefront (SPA); nginx proxies `/api`, `/admin` and `/static` to Django
+## Project structure
 
-Prerequisites
--------------
+```
+├── config/      # Django settings, urls, celery app
+├── users/       # custom user model (email login), registration, JWT
+├── products/    # categories & products API, demo data seed command
+├── cart/        # shopping cart API
+├── order/       # order API + confirmation email task
+├── frontend/    # React SPA (Vite), served by nginx in Docker
+└── screenshots/ # API screenshots used below
+```
 
-- Docker and Docker Compose (v2+) to run the full stack in containers
+## Quick start (Docker)
 
-Quick Start with Docker
------------------------
+Requirements: Docker with Compose v2.
 
-1. Ensure you have Docker and Docker Compose installed
-2. Create a `.env` file with required environment variables (see `.env` in project)
-3. Run the full stack:
+1. Create your env file and adjust the values:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Build and start the stack:
 
    ```bash
    docker compose up --build -d
    ```
 
-4. After containers start, access the application:
-   - **Store frontend (SPA)**: http://localhost:3000/
-   - **DRF API Browser**: http://localhost:8000/
-   - **Admin Panel**: http://localhost:8000/admin/ (also reachable via http://localhost:3000/admin/)
-   - **API Endpoints**: http://localhost:8000/api/v1/store/, /api/v1/orders/, etc.
+3. Open the app:
 
-   On startup the `web` container applies migrations and seeds demo
-   categories/products (idempotent `seed_sports_store` command).
+   - Storefront (SPA): http://localhost:3000/
+   - DRF API browser: http://localhost:8000/api/v1/store/
+   - Admin panel: http://localhost:3000/admin/ (or http://localhost:8000/admin/)
 
-5. Check services health:
-   ```bash
-   docker compose ps
-   ```
+On startup the `web` container applies migrations, collects static files and seeds demo categories/products (idempotent `seed_sports_store` command).
 
-Available Services
-------------------
-
-- **frontend**: React SPA served by nginx - Port 3000 (proxies API calls to `web`)
-- **web**: Django (main API) - Port 8000
-- **celery**: Celery worker for background tasks
-- **redis**: Redis cache and Celery broker - Port 6379
-- **db**: PostgreSQL database - Port 5432
-- Alternatively: Python 3.13, pip and a virtual environment to run locally
-
-Environment
------------
-
-Create a `.env` file in the project root with at least the following variables:
-
-- `SECRET_KEY` — Django secret key
-- `POSTGRES_DB` — Postgres database name
-- `POSTGRES_USER` — Postgres user
-- `POSTGRES_PASSWORD` — Postgres password
-- `POSTGRES_HOST` — usually `db` when using Docker Compose
-- `POSTGRES_PORT` — usually `5432`
-
-Docker usage
-------------------------------------
-
-1. Ensure you have a `.env` file configured (see "Environment" section).
-
-2. Build and start all services:
-
-```bash
-docker compose up --build -d
-```
-
-The `web` container runs an entrypoint that applies migrations and collects static files automatically on startup, so manual migration is not required after bringing the stack up.
-
-To run the Celery worker (if not started as a separate service), exec into the running container and start Celery:
-
-```bash
-docker compose exec web celery -A config worker --loglevel=info
-```
-
-4. (Optional) Create a superuser:
+Optionally create an admin account:
 
 ```bash
 docker compose exec web python manage.py createsuperuser
 ```
 
-5. The API will be available at `http://127.0.0.1:8000`.
+### Services
 
-Notes:
-- The `web` service runs `gunicorn config.wsgi:application` on port `8000`.
-- The `db` service uses Postgres 15 and persists data in a Docker volume `postgres_data`.
+| Service    | Description                          | Port (localhost) |
+|------------|--------------------------------------|------------------|
+| `frontend` | nginx serving the SPA, proxies API   | 3000 |
+| `web`      | Django API (gunicorn in production)  | 8000 |
+| `celery`   | background worker (emails)           | — |
+| `db`       | PostgreSQL 15 (volume `postgres_data`) | — |
+| `redis`    | cache + Celery broker                | — |
 
-Docker + host (DB/Redis in Docker, app on host)
+## Environment variables
 
-If you prefer running the Django app on your host machine while using Docker for database and redis:
+See [.env.example](.env.example) for the full annotated list. The essentials:
+
+- `SECRET_KEY` — Django secret key
+- `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` — Postgres connection (Django)
+- `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` — Postgres container init
+- `REDIS_HOST` — Redis host (`redis` in Docker)
+- `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `DEFAULT_FROM_EMAIL` — SMTP for order confirmations
+
+For production additionally set `DEBUG=False`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS` and `CSRF_TRUSTED_ORIGINS` (HTTPS redirect, secure cookies and HSTS are then enforced automatically).
+
+## Local development
+
+Backend on the host, DB/Redis in Docker:
 
 ```bash
-# start DB and Redis
 docker compose up -d db redis
-
-# on host, in your virtualenv
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
 ```
 
-Running locally without Docker
------------------------------
+Frontend with hot reload (proxies `/api` to `http://127.0.0.1:8000`, see [frontend/vite.config.ts](frontend/vite.config.ts)):
 
-1. Create and activate a virtual environment.
-2. Install dependencies:
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-	pip install -r requirements.txt
+## Testing
 
-3. Configure your `.env` or environment variables.
-4. Apply migrations and run the server:
+Backend (uses in-memory SQLite and locmem cache — no Postgres/Redis/SMTP needed):
 
-	python manage.py migrate
-	python manage.py runserver
+```bash
+python manage.py test
+```
 
-API overview
-------------
+Frontend (Vitest + React Testing Library):
 
-The API exposes endpoints grouped by app. The project mounts routes under `/api/v1/` in `config/urls.py`. Replace `localhost` with your host if different.
+```bash
+cd frontend
+npm test
+```
 
-- Product list (GET): http://localhost:8000/api/v1/store/
+## API overview
+
+Routes are mounted under `/api/v1/` in [config/urls.py](config/urls.py).
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/store/` | product list (paginated, `?category=` filter) |
+| GET | `/api/v1/store/<id>/` | product detail |
+| GET | `/api/v1/store/categories/` | category list |
+| GET | `/api/v1/store/categories/<id>/` | category detail |
+| POST | `/api/v1/auth/register/` | register |
+| POST | `/api/v1/token/` | obtain JWT pair |
+| POST | `/api/v1/token/refresh/` | refresh access token |
+| GET | `/api/v1/carts/` | current user's cart (auth) |
+| POST | `/api/v1/carts/add_item/` | add product to cart (auth) |
+| GET/PUT/PATCH/DELETE | `/api/v1/carts/items/<id>/` | manage a cart item (auth) |
+| GET | `/api/v1/orders/order_list/` | user's orders (auth) |
+| GET | `/api/v1/orders/order_detail/<id>/` | order detail (auth) |
+| POST | `/api/v1/orders/order_create/` | create order from cart (auth) |
+
+<details>
+<summary>API screenshots (DRF browsable API)</summary>
+
 ![Product List](screenshots/product_list.png)
-- Product detail (GET/PUT/PATCH/DELETE): http://localhost:8000/api/v1/store/1/
 ![Product Details](screenshots/product_details.png)
-- Product categories (GET): http://localhost:8000/api/v1/store/categories/
 ![Categories List](screenshots/categories_list.png)
-- Category detail (GET): http://localhost:8000/api/v1/store/categories/1/
 ![Category Details](screenshots/category_details.png)
-
-- Register (POST): http://localhost:8000/api/v1/users/register/
 ![Register](screenshots/register.png)
-
-- View cart (GET): http://localhost:8000/api/v1/carts/  (returns current user's cart; auth required)
 ![Cart List](screenshots/cart_list.png)
-- Cart item detail (GET/PUT/PATCH/DELETE): http://localhost:8000/api/v1/carts/items/1/  (detail for a single cart item / product in the cart)
 ![Cart Details](screenshots/cart_items.png)
-- Add item to cart (POST): http://localhost:8000/api/v1/carts/add_item/  (body: `product_id`, `quantity`; auth required)
 ![Cart Item Adding](screenshots/cart_item_adding.png)
-
-
-- List orders (GET): http://localhost:8000/api/v1/orders/order_list/
 ![Order List](screenshots/order_list.png)
-- Order detail (GET): http://localhost:8000/api/v1/orders/order_detail/1/
 ![Order Detail](screenshots/order_detail.png)
-- Order create (POST): http://localhost:8000/api/v1/orders/order_create/
 ![Order Create](screenshots/order_create.png)
-
-- Admin site (browser): http://localhost:8000/admin/
 ![Admin Site](screenshots/admin_site.png)
 
-
-Frontend development
---------------------
-
-For local development with hot reload (backend on :8000, e.g. via
-`docker compose up -d db redis web`):
-
-	cd frontend
-	npm install
-	npm run dev
-
-The dev server runs on http://localhost:5173 and proxies `/api` to
-`http://127.0.0.1:8000` (see `frontend/vite.config.ts`).
-
-Testing
--------
-
-Run the Django test suite (uses SQLite/locmem in test mode — no Postgres,
-Redis or SMTP needed):
-
-	python manage.py test
-
-Run the frontend tests (Vitest + React Testing Library):
-
-	cd frontend
-	npm test
-
+</details>

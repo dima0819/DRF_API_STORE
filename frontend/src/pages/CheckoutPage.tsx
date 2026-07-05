@@ -7,6 +7,8 @@ import { formatPrice, getErrorMessage } from '../api/client'
 import Button from '../components/Button'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useLanguage } from '../context/LanguageContext'
+import { translate } from '../i18n/translations'
 
 interface AddressForm {
   recipient: string
@@ -29,6 +31,11 @@ const EMPTY_FORM: AddressForm = {
 // Polish postal code: NN-NNN
 const POSTAL_CODE_RE = /^\d{2}-\d{3}$/
 
+export function formatPostalCode(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 5)
+  return digits.length > 2 ? `${digits.slice(0, 2)}-${digits.slice(2)}` : digits
+}
+
 /**
  * Combine the individual address fields into the single `address` string the
  * API expects, e.g. "Jan Kowalski, ul. Sportowa 1/2, 00-001 Warszawa".
@@ -42,18 +49,18 @@ export function composeAddress(form: AddressForm): string {
 
 /** Returns a validation error message, or null when the form is valid. */
 export function validateAddress(form: AddressForm): string | null {
-  if (!form.recipient.trim()) return 'Podaj imię i nazwisko odbiorcy'
-  if (!form.street.trim()) return 'Podaj nazwę ulicy'
-  if (!form.houseNumber.trim()) return 'Podaj numer domu / lokalu'
-  if (!POSTAL_CODE_RE.test(form.postalCode.trim()))
-    return 'Podaj kod pocztowy w formacie 00-000'
-  if (!form.city.trim()) return 'Podaj miasto'
+  if (!form.recipient.trim()) return translate('checkout.errRecipient')
+  if (!form.street.trim()) return translate('checkout.errStreet')
+  if (!form.houseNumber.trim()) return translate('checkout.errHouse')
+  if (!POSTAL_CODE_RE.test(form.postalCode.trim())) return translate('checkout.errPostal')
+  if (!form.city.trim()) return translate('checkout.errCity')
   return null
 }
 
 export default function CheckoutPage() {
   const { isAuthenticated } = useAuth()
   const { cart, isLoading: cartLoading, refreshCart } = useCart()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const [form, setForm] = useState<AddressForm>(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
@@ -117,14 +124,14 @@ export default function CheckoutPage() {
           >
             <CheckCircle className="mx-auto h-20 w-20 text-brand-400" />
           </motion.div>
-          <h1 className="mt-6 text-2xl font-bold text-white">Zamówienie złożone!</h1>
+          <h1 className="mt-6 text-2xl font-bold text-white">{t('checkout.successTitle')}</h1>
           <p className="mt-3 text-gray-400">
-            Twoje zamówienie #{orderId} zostało przyjęte. Potwierdzenie wysłaliśmy na email.
+            {t('checkout.successText', { id: orderId ?? '' })}
           </p>
           <div className="mt-8 flex flex-col gap-3">
-            <Button onClick={() => navigate('/zamowienia')}>Moje zamówienia</Button>
+            <Button onClick={() => navigate('/zamowienia')}>{t('checkout.myOrders')}</Button>
             <Button variant="secondary" onClick={() => navigate('/')}>
-              Kontynuuj zakupy
+              {t('checkout.continueShopping')}
             </Button>
           </div>
         </motion.div>
@@ -137,21 +144,21 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-white">Finalizacja zamówienia</h1>
-      <p className="mt-2 text-gray-400">Uzupełnij dane dostawy i potwierdź zamówienie</p>
+      <h1 className="text-3xl font-bold text-white">{t('checkout.title')}</h1>
+      <p className="mt-2 text-gray-400">{t('checkout.subtitle')}</p>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-5">
         <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-6">
           <div className="rounded-2xl border border-brand-500/10 bg-surface-card p-6">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="h-5 w-5 text-brand-400" />
-              <h2 className="font-semibold text-white">Adres dostawy</h2>
+              <h2 className="font-semibold text-white">{t('checkout.addressHeader')}</h2>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label htmlFor="recipient" className="block text-sm font-medium text-gray-400 mb-1.5">
-                  Imię i nazwisko odbiorcy
+                  {t('checkout.recipient')}
                 </label>
                 <input
                   id="recipient"
@@ -167,7 +174,7 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="sm:col-span-2">
                   <label htmlFor="street" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    Ulica
+                    {t('checkout.street')}
                   </label>
                   <input
                     id="street"
@@ -181,7 +188,7 @@ export default function CheckoutPage() {
                 </div>
                 <div>
                   <label htmlFor="houseNumber" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    Nr domu / lokalu
+                    {t('checkout.houseNumber')}
                   </label>
                   <input
                     id="houseNumber"
@@ -198,22 +205,23 @@ export default function CheckoutPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div>
                   <label htmlFor="postalCode" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    Kod pocztowy
+                    {t('checkout.postalCode')}
                   </label>
                   <input
                     id="postalCode"
                     value={form.postalCode}
-                    onChange={(e) => update('postalCode', e.target.value)}
+                    onChange={(e) => update('postalCode', formatPostalCode(e.target.value))}
                     autoComplete="postal-code"
                     placeholder="00-000"
                     inputMode="numeric"
+                    maxLength={6}
                     className={inputClass}
                     required
                   />
                 </div>
                 <div className="sm:col-span-2">
                   <label htmlFor="city" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    Miasto
+                    {t('checkout.city')}
                   </label>
                   <input
                     id="city"
@@ -229,13 +237,13 @@ export default function CheckoutPage() {
 
               <div>
                 <label htmlFor="notes" className="block text-sm font-medium text-gray-400 mb-1.5">
-                  Uwagi do zamówienia <span className="text-gray-600">(opcjonalnie)</span>
+                  {t('checkout.notes')} <span className="text-gray-600">{t('checkout.optional')}</span>
                 </label>
                 <textarea
                   id="notes"
                   value={form.notes}
                   onChange={(e) => update('notes', e.target.value)}
-                  placeholder="Np. kod do domofonu, godziny odbioru..."
+                  placeholder={t('checkout.notesPlaceholder')}
                   rows={2}
                   className={`${inputClass} resize-none`}
                 />
@@ -245,10 +253,7 @@ export default function CheckoutPage() {
 
           <div className="flex items-start gap-3 rounded-xl border border-brand-500/10 bg-brand-500/5 p-4">
             <ShieldCheck className="h-5 w-5 shrink-0 text-brand-400 mt-0.5" />
-            <p className="text-sm text-gray-400">
-              Po złożeniu zamówienia otrzymasz potwierdzenie na email. Płatność realizowana jest
-              przy odbiorze (demo).
-            </p>
+            <p className="text-sm text-gray-400">{t('checkout.info')}</p>
           </div>
 
           {error && (
@@ -262,13 +267,13 @@ export default function CheckoutPage() {
           )}
 
           <Button type="submit" loading={loading} className="w-full sm:w-auto">
-            Złóż zamówienie
+            {t('checkout.submit')}
           </Button>
         </form>
 
         <div className="lg:col-span-2">
           <div className="sticky top-24 rounded-2xl border border-brand-500/10 bg-surface-card p-6">
-            <h2 className="font-semibold text-white">Podsumowanie</h2>
+            <h2 className="font-semibold text-white">{t('checkout.summary')}</h2>
             <ul className="mt-4 space-y-3">
               {cart?.items.map((item) => (
                 <li key={item.id} className="flex justify-between text-sm">
@@ -280,7 +285,7 @@ export default function CheckoutPage() {
               ))}
             </ul>
             <div className="mt-4 border-t border-brand-500/10 pt-4 flex justify-between">
-              <span className="font-semibold text-white">Razem</span>
+              <span className="font-semibold text-white">{t('cart.total')}</span>
               <span className="text-xl font-bold text-brand-400">
                 {formatPrice(cart?.total_cart_price ?? '0')}
               </span>
@@ -289,7 +294,7 @@ export default function CheckoutPage() {
               to="/koszyk"
               className="mt-4 block text-center text-sm text-brand-400 hover:text-brand-300"
             >
-              ← Wróć do koszyka
+              {t('checkout.backToCart')}
             </Link>
           </div>
         </div>

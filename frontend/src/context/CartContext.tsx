@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react'
 import { getErrorMessage } from '../api/client'
+import { translate } from '../i18n/translations'
 import { useToast } from './ToastContext'
 import {
   addToCart as apiAddToCart,
@@ -126,7 +127,7 @@ export function useCartAction() {
       }
       try {
         await addToCart(productId, quantity)
-        showToast('Dodano do koszyka!')
+        showToast(translate('cart.addedToast'))
         return true
       } catch (err) {
         showToast(getErrorMessage(err))

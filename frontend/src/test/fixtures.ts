@@ -61,6 +61,6 @@ export const sampleCategories: Category[] = [
 ]
 
 export function authenticate(): void {
-  localStorage.setItem('sportstore_access', 'test-access-token')
-  localStorage.setItem('sportstore_refresh', 'test-refresh-token')
+  localStorage.setItem('motiongear_access', 'test-access-token')
+  localStorage.setItem('motiongear_refresh', 'test-refresh-token')
 }

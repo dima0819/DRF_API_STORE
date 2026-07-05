@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AuthProvider } from '../context/AuthContext'
+import { LanguageProvider } from '../context/LanguageContext'
 import { CartProvider } from '../context/CartContext'
 import { ToastProvider } from '../context/ToastContext'
 import RegisterPage from '../pages/RegisterPage'
@@ -26,16 +27,18 @@ vi.mock('../api/cart', () => ({
 function renderRegister() {
   return render(
     <MemoryRouter initialEntries={['/rejestracja']}>
-      <AuthProvider>
-        <ToastProvider>
-          <CartProvider>
-            <Routes>
-              <Route path="/" element={<div>STRONA GŁÓWNA</div>} />
-              <Route path="/rejestracja" element={<RegisterPage />} />
-            </Routes>
-          </CartProvider>
-        </ToastProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <CartProvider>
+              <Routes>
+                <Route path="/" element={<div>STRONA GŁÓWNA</div>} />
+                <Route path="/rejestracja" element={<RegisterPage />} />
+              </Routes>
+            </CartProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </MemoryRouter>,
   )
 }

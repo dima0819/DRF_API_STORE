@@ -1,7 +1,8 @@
 import type { ApiError } from '../types'
+import { getLang, translate } from '../i18n/translations'
 
-const TOKEN_KEY = 'sportstore_access'
-const REFRESH_KEY = 'sportstore_refresh'
+const TOKEN_KEY = 'motiongear_access'
+const REFRESH_KEY = 'motiongear_refresh'
 
 export function getAccessToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)
@@ -76,7 +77,7 @@ export async function apiFetch<T>(
   }
 
   if (!res.ok) {
-    let error: ApiError = { detail: 'Wystąpił błąd' }
+    let error: ApiError = { detail: translate('errors.generic') }
     try {
       error = await res.json()
     } catch {
@@ -89,23 +90,27 @@ export async function apiFetch<T>(
   return res.json()
 }
 
+function locale(): string {
+  return getLang() === 'en' ? 'en-GB' : 'pl-PL'
+}
+
 export function formatPrice(value: string | number): string {
   const num = typeof value === 'string' ? parseFloat(value) : value
-  return new Intl.NumberFormat('pl-PL', {
+  return new Intl.NumberFormat(locale(), {
     style: 'currency',
     currency: 'PLN',
   }).format(num)
 }
 
 export function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat('pl-PL', {
+  return new Intl.DateTimeFormat(locale(), {
     dateStyle: 'long',
     timeStyle: 'short',
   }).format(new Date(iso))
 }
 
 export function getErrorMessage(error: unknown): string {
-  if (!error || typeof error !== 'object') return 'Wystąpił nieoczekiwany błąd'
+  if (!error || typeof error !== 'object') return translate('errors.unexpected')
   const e = error as ApiError
   if (typeof e.detail === 'string') return e.detail
   if (Array.isArray(e.detail)) return e.detail.join(', ')
@@ -118,5 +123,5 @@ export function getErrorMessage(error: unknown): string {
   if (typeof e.non_field_errors === 'object' && Array.isArray(e.non_field_errors)) {
     return e.non_field_errors.join(', ')
   }
-  return 'Wystąpił nieoczekiwany błąd'
+  return translate('errors.unexpected')
 }

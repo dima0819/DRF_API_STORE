@@ -4,12 +4,15 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import ProductCard from '../components/ProductCard'
 import { getProductImage } from '../config/categories'
+import { LanguageProvider } from '../context/LanguageContext'
 import { makeProduct } from './fixtures'
 
 function renderCard(...props: Parameters<typeof ProductCard>) {
   return render(
     <MemoryRouter>
-      <ProductCard {...props[0]} />
+      <LanguageProvider>
+        <ProductCard {...props[0]} />
+      </LanguageProvider>
     </MemoryRouter>,
   )
 }

@@ -7,9 +7,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
-    # No published port: only other containers need to reach Postgres, via
-    # the internal Docker network (hostname "db"). Publishing 5432 to the
-    # host isn't needed and would be one more thing to firewall.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres}"]
       interval: 5s
@@ -20,8 +17,6 @@ services:
     image: redis:7-alpine
     container_name: store_redis_cont
     restart: always
-    # No published port, same reasoning as db: only reached internally via
-    # the "redis" hostname on the Docker network.
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

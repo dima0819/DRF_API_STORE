@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { AuthProvider } from '../context/AuthContext'
 import { CartProvider } from '../context/CartContext'
+import { LanguageProvider } from '../context/LanguageContext'
 import { ToastProvider } from '../context/ToastContext'
 
 interface ProvidersProps {
@@ -13,11 +14,13 @@ interface ProvidersProps {
 export function Providers({ children, route = '/' }: ProvidersProps) {
   return (
     <MemoryRouter initialEntries={[route]}>
-      <AuthProvider>
-        <ToastProvider>
-          <CartProvider>{children}</CartProvider>
-        </ToastProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <CartProvider>{children}</CartProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </MemoryRouter>
   )
 }

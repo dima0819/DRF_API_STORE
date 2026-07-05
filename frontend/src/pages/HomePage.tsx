@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchCategories } from '../api/products'
 import CategoryCard from '../components/CategoryCard'
+import { useLanguage } from '../context/LanguageContext'
 import type { Category } from '../types'
 
 export default function HomePage() {
+  const { t } = useLanguage()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -16,6 +18,12 @@ export default function HomePage() {
       .catch(console.error)
       .finally(() => setLoading(false))
   }, [])
+
+  const stats = [
+    { icon: Trophy, label: t('home.stat.products') },
+    { icon: Zap, label: t('home.stat.delivery') },
+    { icon: Sparkles, label: t('home.stat.brands') },
+  ]
 
   return (
     <div>
@@ -42,7 +50,7 @@ export default function HomePage() {
           >
             <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-4 py-1.5 text-sm font-medium text-brand-300">
               <Sparkles className="h-4 w-4" />
-              Nowa kolekcja 2026
+              {t('home.badge')}
             </span>
           </motion.div>
 
@@ -52,10 +60,10 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl"
           >
-            Osiągnij swój{' '}
-            <span className="gradient-text">sportowy</span>
+            {t('home.hero1')}{' '}
+            <span className="gradient-text">{t('home.heroAccent')}</span>
             <br />
-            potencjał
+            {t('home.hero2')}
           </motion.h1>
 
           <motion.p
@@ -64,8 +72,7 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="mx-auto mt-6 max-w-2xl text-lg text-gray-400"
           >
-            Odkryj profesjonalny sprzęt sportowy — piłki, sztangi, rowery i więcej.
-            Wybierz kategorię i znajdź idealny sprzęt dla siebie.
+            {t('home.heroText')}
           </motion.p>
 
           <motion.div
@@ -78,14 +85,14 @@ export default function HomePage() {
               href="#kategorie"
               className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-6 py-3 font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:bg-brand-400 hover:shadow-brand-400/30"
             >
-              Przeglądaj kategorie
+              {t('home.browseCategories')}
               <ArrowRight className="h-4 w-4" />
             </a>
             <Link
               to="/koszyk"
               className="inline-flex items-center gap-2 rounded-xl border border-brand-500/20 bg-surface-elevated px-6 py-3 font-semibold text-brand-300 transition-all hover:border-brand-500/40"
             >
-              Koszyk
+              {t('nav.cart')}
             </Link>
           </motion.div>
 
@@ -95,11 +102,7 @@ export default function HomePage() {
             transition={{ delay: 0.5 }}
             className="mt-16 grid grid-cols-3 gap-6 max-w-lg mx-auto"
           >
-            {[
-              { icon: Trophy, label: '500+ produktów' },
-              { icon: Zap, label: 'Szybka dostawa' },
-              { icon: Sparkles, label: 'Top marki' },
-            ].map(({ icon: Icon, label }) => (
+            {stats.map(({ icon: Icon, label }) => (
               <div key={label} className="flex flex-col items-center gap-2">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10 text-brand-400">
                   <Icon className="h-5 w-5" />
@@ -121,11 +124,9 @@ export default function HomePage() {
             className="mb-10 text-center"
           >
             <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              Wybierz <span className="gradient-text">kategorię</span>
+              {t('home.choose')} <span className="gradient-text">{t('home.chooseAccent')}</span>
             </h2>
-            <p className="mt-3 text-gray-400">
-              Przeglądaj sprzęt według dyscypliny sportowej
-            </p>
+            <p className="mt-3 text-gray-400">{t('home.chooseText')}</p>
           </motion.div>
 
           {loading ? (
@@ -136,7 +137,7 @@ export default function HomePage() {
             </div>
           ) : categories.length === 0 ? (
             <div className="rounded-2xl border border-brand-500/10 bg-surface-card p-12 text-center">
-              <p className="text-gray-400">Brak kategorii. Uruchom seed danych w backendzie.</p>
+              <p className="text-gray-400">{t('home.noCategories')}</p>
               <code className="mt-2 block text-sm text-brand-400">
                 python manage.py seed_sports_store
               </code>

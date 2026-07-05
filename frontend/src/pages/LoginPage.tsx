@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Button from '../components/Button'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
 
 export default function LoginPage() {
   const { login, error, clearError } = useAuth()
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: string })?.from ?? '/'
@@ -39,15 +41,13 @@ export default function LoginPage() {
         <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-500/15">
           <LogIn className="h-6 w-6 text-brand-400" />
         </div>
-        <h1 className="text-2xl font-bold text-white">Zaloguj się</h1>
-        <p className="mt-2 text-sm text-gray-400">
-          Zaloguj się, aby korzystać z koszyka i składać zamówienia
-        </p>
+        <h1 className="text-2xl font-bold text-white">{t('login.title')}</h1>
+        <p className="mt-2 text-sm text-gray-400">{t('login.subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-400 mb-1.5">
-              Email
+              {t('login.email')}
             </label>
             <input
               id="email"
@@ -61,7 +61,7 @@ export default function LoginPage() {
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1.5">
-              Hasło
+              {t('login.password')}
             </label>
             <input
               id="password"
@@ -81,21 +81,21 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" loading={loading} className="w-full">
-            Zaloguj się
+            {t('login.title')}
           </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          Nie masz konta?{' '}
+          {t('login.noAccount')}{' '}
           <Link to="/rejestracja" className="font-medium text-brand-400 hover:text-brand-300">
-            Zarejestruj się
+            {t('login.registerLink')}
           </Link>
         </p>
         <Link
           to="/"
           className="mt-4 block text-center text-sm text-gray-500 hover:text-gray-400"
         >
-          ← Kontynuuj bez logowania
+          {t('login.continueGuest')}
         </Link>
       </motion.div>
     </div>

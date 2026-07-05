@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import type { Category } from '../types'
 import { getCategoryVisual } from '../config/categories'
+import { useLanguage } from '../context/LanguageContext'
 
 interface CategoryCardProps {
   category: Category
@@ -9,6 +10,7 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ category, index = 0 }: CategoryCardProps) {
+  const { t } = useLanguage()
   const visual = getCategoryVisual(category.slug)
   const Icon = visual.icon
 
@@ -43,7 +45,7 @@ export default function CategoryCard({ category, index = 0 }: CategoryCardProps)
               <p className="mt-1.5 text-sm text-gray-400 line-clamp-2">{category.description}</p>
             )}
             <span className="mt-3 inline-flex items-center text-sm font-medium text-brand-400 opacity-0 transition-all duration-300 group-hover:opacity-100">
-              Przeglądaj →
+              {t('card.browse')}
             </span>
           </div>
         </div>

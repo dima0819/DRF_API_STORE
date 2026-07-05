@@ -11,12 +11,14 @@ import {
   slugifyCategoryName,
 } from '../config/categories'
 import { useCartAction } from '../context/CartContext'
+import { useLanguage } from '../context/LanguageContext'
 import type { Product } from '../types'
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { handleAddToCart } = useCartAction()
+  const { t } = useLanguage()
   const [product, setProduct] = useState<Product | null>(null)
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(true)
@@ -52,10 +54,10 @@ export default function ProductDetailPage() {
   const inStock = product.stock > 0
   const stockLabel =
     product.stock === 0
-      ? 'Brak na stanie'
+      ? t('product.outOfStock')
       : product.stock <= 5
-        ? `Ostatnie ${product.stock} szt.`
-        : `Dostępne: ${product.stock} szt.`
+        ? t('product.lastN', { n: product.stock })
+        : t('product.availableN', { n: product.stock })
 
   const handleAdd = async () => {
     setAdding(true)
@@ -109,7 +111,7 @@ export default function ProductDetailPage() {
 
           <div className="mt-8 rounded-xl bg-surface-elevated p-5 border border-brand-500/10">
             <h2 className="text-sm font-semibold uppercase tracking-wider text-brand-400">
-              Opis produktu
+              {t('product.description')}
             </h2>
             <p className="mt-3 leading-relaxed text-gray-300">{product.description}</p>
           </div>
@@ -119,7 +121,7 @@ export default function ProductDetailPage() {
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="flex h-11 w-11 items-center justify-center text-gray-400 hover:text-white transition-colors"
-                aria-label="Zmniejsz ilość"
+                aria-label={t('product.decrease')}
               >
                 <Minus className="h-4 w-4" />
               </button>
@@ -128,7 +130,7 @@ export default function ProductDetailPage() {
                 onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                 disabled={quantity >= product.stock}
                 className="flex h-11 w-11 items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-40"
-                aria-label="Zwiększ ilość"
+                aria-label={t('product.increase')}
               >
                 <Plus className="h-4 w-4" />
               </button>
@@ -142,20 +144,18 @@ export default function ProductDetailPage() {
             >
               {added ? (
                 <>
-                  <Check className="h-4 w-4" /> Dodano!
+                  <Check className="h-4 w-4" /> {t('product.added')}
                 </>
               ) : (
                 <>
-                  <ShoppingCart className="h-4 w-4" /> Dodaj do koszyka
+                  <ShoppingCart className="h-4 w-4" /> {t('product.addToCart')}
                 </>
               )}
             </Button>
           </div>
 
           {!inStock && (
-            <p className="mt-4 text-sm text-red-400">
-              Ten produkt jest obecnie niedostępny. Sprawdź ponownie później.
-            </p>
+            <p className="mt-4 text-sm text-red-400">{t('product.unavailable')}</p>
           )}
         </motion.div>
       </div>

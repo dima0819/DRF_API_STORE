@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import type { Product } from '../types'
 import { formatPrice } from '../api/client'
 import { getProductImage, slugifyCategoryName } from '../config/categories'
+import { useLanguage } from '../context/LanguageContext'
 
 interface ProductCardProps {
   product: Product
@@ -12,6 +13,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, index = 0, onAddToCart }: ProductCardProps) {
+  const { t } = useLanguage()
   const categorySlug = slugifyCategoryName(product.category)
   const image = getProductImage(product.name, categorySlug)
   const inStock = product.stock > 0
@@ -33,12 +35,12 @@ export default function ProductCard({ product, index = 0, onAddToCart }: Product
         </div>
         {!inStock && (
           <span className="absolute top-3 left-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white">
-            Brak na stanie
+            {t('product.outOfStock')}
           </span>
         )}
         {inStock && product.stock <= 5 && (
           <span className="absolute top-3 left-3 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold text-white">
-            Ostatnie sztuki
+            {t('product.lastFew')}
           </span>
         )}
       </Link>
@@ -63,7 +65,7 @@ export default function ProductCard({ product, index = 0, onAddToCart }: Product
             }}
             disabled={!inStock}
             className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/15 text-brand-400 transition-colors hover:bg-brand-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-            aria-label="Dodaj do koszyka"
+            aria-label={t('product.addToCart')}
           >
             <ShoppingCart className="h-4 w-4" />
           </motion.button>
