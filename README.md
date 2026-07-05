@@ -16,6 +16,41 @@ Full-stack sports equipment store: a Django REST Framework backend (users, produ
 - ⚡ Redis caching of product listings
 - 🐳 One-command Docker Compose setup with demo data seeding
 
+## Screenshots
+
+### Home page
+
+![Home page](screenshots/storefront_home.png)
+
+### Category browsing
+
+![Categories](screenshots/storefront_categories.png)
+
+### Cart
+
+![Cart](screenshots/storefront_cart.png)
+
+### Checkout
+
+![Checkout](screenshots/storefront_checkout.png)
+
+### Order history
+
+![Orders](screenshots/storefront_orders.png)
+
+### Mobile (live at motiongear.duckdns.org)
+
+| Home | Categories (EN) | Orders |
+|------|-----------------|--------|
+| ![Mobile home](screenshots/mobile_home.png) | ![Mobile categories in English](screenshots/mobile_categories_en.png) | ![Mobile orders](screenshots/mobile_orders.png) |
+
+<details>
+<summary>More: login screen</summary>
+
+![Login](screenshots/storefront_login.png)
+
+</details>
+
 ## Tech stack
 
 | Layer    | Technology |
