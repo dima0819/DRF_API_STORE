@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Django tests
         env:
-          DEBUG: "0"
+          DEBUG: "1"
         run: python manage.py test
 
   docker-up:
