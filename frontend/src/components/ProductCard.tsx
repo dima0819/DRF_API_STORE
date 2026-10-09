@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion'
-import { ShoppingCart } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Product } from '../types'
 import { formatPrice } from '../api/client'
-import { getProductImage, slugifyCategoryName } from '../config/categories'
+import { slugifyCategoryName } from '../config/categories'
 import { useLanguage } from '../context/LanguageContext'
+import Badge from './Badge'
+import ProductImage from './ProductImage'
 
 interface ProductCardProps {
   product: Product
@@ -12,65 +14,88 @@ interface ProductCardProps {
   onAddToCart?: () => void
 }
 
-export default function ProductCard({ product, index = 0, onAddToCart }: ProductCardProps) {
+const LOW_STOCK_THRESHOLD = 5
+
+export default function ProductCard({
+  product,
+  index = 0,
+  onAddToCart,
+}: ProductCardProps) {
   const { t } = useLanguage()
   const categorySlug = slugifyCategoryName(product.category)
-  const image = getProductImage(product.name, categorySlug)
   const inStock = product.stock > 0
+  const lowStock = inStock && product.stock <= LOW_STOCK_THRESHOLD
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
+    <motion.article
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.06, duration: 0.45 }}
-      className="group flex flex-col overflow-hidden rounded-2xl bg-surface-card border border-brand-500/10 transition-all duration-300 hover:border-brand-500/25 hover:shadow-lg hover:shadow-brand-500/5"
+      transition={{
+        delay: Math.min(index, 7) * 0.04,
+        duration: 0.25,
+        ease: [0.25, 1, 0.5, 1],
+      }}
+      className="group relative flex flex-col overflow-hidden rounded-xl border border-line bg-surface transition-colors duration-200 hover:border-line-strong"
     >
-      <Link to={`/produkt/${product.id}`} className="relative block overflow-hidden">
-        <div className="aspect-square overflow-hidden bg-surface-elevated">
-          <img
-            src={image}
-            alt={product.name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        </div>
+      <Link
+        to={`/produkt/${product.id}`}
+        className="relative block aspect-[4/3] overflow-hidden"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        <ProductImage
+          name={product.name}
+          categorySlug={categorySlug}
+          className="h-full w-full transition-transform duration-300 group-hover:scale-[1.04]"
+        />
         {!inStock && (
-          <span className="absolute top-3 left-3 rounded-full bg-red-500/90 px-3 py-1 text-xs font-semibold text-white">
-            {t('product.outOfStock')}
+          <span aria-hidden="true" className="absolute left-3 top-3">
+            <Badge tone="danger" solid>
+              {t('product.outOfStock')}
+            </Badge>
           </span>
         )}
-        {inStock && product.stock <= 5 && (
-          <span className="absolute top-3 left-3 rounded-full bg-amber-500/90 px-3 py-1 text-xs font-semibold text-white">
-            {t('product.lastFew')}
+        {lowStock && (
+          <span aria-hidden="true" className="absolute left-3 top-3">
+            <Badge tone="warn" solid>
+              {t('product.lastFew')}
+            </Badge>
           </span>
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col p-4">
-        <span className="text-xs font-medium uppercase tracking-wider text-brand-400">
+      <div className="flex flex-1 flex-col gap-1 p-4">
+        <span className="text-2xs font-semibold uppercase tracking-[0.1em] text-content-subtle">
           {product.category}
         </span>
-        <Link to={`/produkt/${product.id}`}>
-          <h3 className="mt-1 font-semibold text-white transition-colors group-hover:text-brand-300 line-clamp-2">
+        <h3 className="text-sm font-semibold leading-snug text-content">
+          <Link
+            to={`/produkt/${product.id}`}
+            className="transition-colors hover:text-accent-300"
+          >
             {product.name}
-          </h3>
-        </Link>
-        <div className="mt-auto flex items-center justify-between pt-4">
-          <span className="text-xl font-bold text-brand-400">{formatPrice(product.price)}</span>
+          </Link>
+        </h3>
+
+        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+          <span className="text-lg font-bold tabular-nums tracking-tight text-content">
+            {formatPrice(product.price)}
+          </span>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={(e) => {
-              e.preventDefault()
+            type="button"
+            whileTap={inStock ? { scale: 0.92 } : undefined}
+            onClick={(event) => {
+              event.preventDefault()
               onAddToCart?.()
             }}
             disabled={!inStock}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/15 text-brand-400 transition-colors hover:bg-brand-500 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-raised text-content-muted transition-colors hover:bg-accent-400 hover:text-accent-ink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-raised disabled:hover:text-content-muted"
             aria-label={t('product.addToCart')}
           >
-            <ShoppingCart className="h-4 w-4" />
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
           </motion.button>
         </div>
       </div>
-    </motion.div>
+    </motion.article>
   )
 }

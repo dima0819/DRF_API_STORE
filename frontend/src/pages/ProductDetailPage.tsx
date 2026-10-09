@@ -1,18 +1,21 @@
 import { motion } from 'framer-motion'
-import { ArrowLeft, Check, Minus, Package, Plus, ShoppingCart } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ArrowLeft, Check, Package, ShoppingCart } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { fetchProduct } from '../api/products'
 import { formatPrice } from '../api/client'
+import Badge from '../components/Badge'
 import Button from '../components/Button'
-import {
-  getCategoryVisualByName,
-  getProductImage,
-  slugifyCategoryName,
-} from '../config/categories'
+import ProductImage from '../components/ProductImage'
+import QuantityStepper from '../components/QuantityStepper'
+import Skeleton from '../components/Skeleton'
+import { slugifyCategoryName } from '../config/categories'
 import { useCartAction } from '../context/CartContext'
 import { useLanguage } from '../context/LanguageContext'
 import type { Product } from '../types'
+
+const LOW_STOCK_THRESHOLD = 5
+const ADDED_FEEDBACK_MS = 2000
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -24,6 +27,7 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true)
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
+  const addedTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -33,15 +37,23 @@ export default function ProductDetailPage() {
       .finally(() => setLoading(false))
   }, [id, navigate])
 
+  useEffect(
+    () => () => {
+      if (addedTimer.current) clearTimeout(addedTimer.current)
+    },
+    [],
+  )
+
   if (loading || !product) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="grid gap-8 lg:grid-cols-2">
-          <div className="aspect-square animate-pulse rounded-2xl bg-surface-card" />
-          <div className="space-y-4">
-            <div className="h-8 w-2/3 animate-pulse rounded bg-surface-card" />
-            <div className="h-4 w-full animate-pulse rounded bg-surface-card" />
-            <div className="h-4 w-3/4 animate-pulse rounded bg-surface-card" />
+          <Skeleton className="aspect-square" rounded="xl" />
+          <div className="space-y-4 pt-2">
+            <Skeleton className="h-9 w-2/3" />
+            <Skeleton className="h-7 w-1/3" />
+            <Skeleton className="h-24 w-full" rounded="lg" />
+            <Skeleton className="h-11 w-full" rounded="lg" />
           </div>
         </div>
       </div>
@@ -49,15 +61,13 @@ export default function ProductDetailPage() {
   }
 
   const categorySlug = slugifyCategoryName(product.category)
-  const visual = getCategoryVisualByName(product.category)
-  const image = getProductImage(product.name, categorySlug)
   const inStock = product.stock > 0
-  const stockLabel =
-    product.stock === 0
-      ? t('product.outOfStock')
-      : product.stock <= 5
-        ? t('product.lastN', { n: product.stock })
-        : t('product.availableN', { n: product.stock })
+  const lowStock = inStock && product.stock <= LOW_STOCK_THRESHOLD
+  const stockLabel = !inStock
+    ? t('product.outOfStock')
+    : lowStock
+      ? t('product.lastN', { n: product.stock })
+      : t('product.availableN', { n: product.stock })
 
   const handleAdd = async () => {
     setAdding(true)
@@ -65,97 +75,111 @@ export default function ProductDetailPage() {
       navigate('/logowanie', { state: { from: `/produkt/${product.id}` } }),
     )
     setAdding(false)
-    if (ok) {
-      setAdded(true)
-      setTimeout(() => setAdded(false), 2000)
-    }
+    if (!ok) return
+    setAdded(true)
+    if (addedTimer.current) clearTimeout(addedTimer.current)
+    addedTimer.current = setTimeout(() => setAdded(false), ADDED_FEEDBACK_MS)
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
       <Link
         to={`/kategoria/${categorySlug}`}
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-brand-400 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-content-muted transition-colors hover:text-content"
       >
-        <ArrowLeft className="h-4 w-4" /> {product.category}
+        <ArrowLeft className="h-3.5 w-3.5" strokeWidth={2} />
+        {product.category}
       </Link>
 
-      <div className="grid gap-10 lg:grid-cols-2">
+      <div className="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-12">
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-2xl bg-surface-card border border-brand-500/10"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+          className="relative overflow-hidden rounded-xl border border-line"
         >
-          <img src={image} alt={product.name} className="aspect-square w-full object-cover" />
-          <div className={`absolute top-4 left-4 rounded-full bg-gradient-to-r ${visual.gradient} px-3 py-1 text-xs font-semibold text-white`}>
-            {product.category}
-          </div>
+          <ProductImage
+            name={product.name}
+            categorySlug={categorySlug}
+            className="aspect-square w-full"
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            priority
+          />
+          <span className="absolute left-4 top-4">
+            <Badge tone="neutral">{product.category}</Badge>
+          </span>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.05, ease: [0.25, 1, 0.5, 1] }}
           className="flex flex-col"
         >
-          <h1 className="text-3xl font-bold text-white sm:text-4xl">{product.name}</h1>
-          <p className="mt-4 text-3xl font-bold text-brand-400">{formatPrice(product.price)}</p>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            {product.name}
+          </h1>
 
-          <div className="mt-6 flex items-center gap-2">
-            <Package className="h-5 w-5 text-brand-400" />
-            <span className={`text-sm font-medium ${inStock ? 'text-brand-300' : 'text-red-400'}`}>
+          <p className="mt-5 text-3xl font-bold tabular-nums tracking-tight">
+            {formatPrice(product.price)}
+          </p>
+
+          <p className="mt-5 flex items-center gap-2 text-sm">
+            <Package
+              className={`h-4 w-4 ${inStock ? 'text-accent-400' : 'text-danger'}`}
+              strokeWidth={1.75}
+            />
+            <span
+              className={
+                !inStock
+                  ? 'text-danger'
+                  : lowStock
+                    ? 'text-warn'
+                    : 'text-content-muted'
+              }
+            >
               {stockLabel}
             </span>
-          </div>
+          </p>
 
-          <div className="mt-8 rounded-xl bg-surface-elevated p-5 border border-brand-500/10">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-brand-400">
+          <section className="mt-7 rounded-xl border border-line bg-surface p-5">
+            <h2 className="text-2xs font-semibold uppercase tracking-[0.1em] text-content-subtle">
               {t('product.description')}
             </h2>
-            <p className="mt-3 leading-relaxed text-gray-300">{product.description}</p>
-          </div>
+            <p className="mt-2.5 text-sm leading-relaxed text-content-muted">
+              {product.description}
+            </p>
+          </section>
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <div className="flex items-center rounded-xl border border-brand-500/20 bg-surface-card">
-              <button
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="flex h-11 w-11 items-center justify-center text-gray-400 hover:text-white transition-colors"
-                aria-label={t('product.decrease')}
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="w-12 text-center font-semibold text-white">{quantity}</span>
-              <button
-                onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                disabled={quantity >= product.stock}
-                className="flex h-11 w-11 items-center justify-center text-gray-400 hover:text-white transition-colors disabled:opacity-40"
-                aria-label={t('product.increase')}
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <QuantityStepper
+              quantity={quantity}
+              max={product.stock}
+              onChange={(next) => setQuantity(Math.max(1, next))}
+            />
             <Button
+              size="lg"
               onClick={handleAdd}
               loading={adding}
               disabled={!inStock}
-              className="flex-1 min-w-[200px]"
+              className="min-w-[12rem] flex-1"
             >
               {added ? (
                 <>
-                  <Check className="h-4 w-4" /> {t('product.added')}
+                  <Check className="h-4 w-4" strokeWidth={2.5} />
+                  {t('product.added')}
                 </>
               ) : (
                 <>
-                  <ShoppingCart className="h-4 w-4" /> {t('product.addToCart')}
+                  <ShoppingCart className="h-4 w-4" strokeWidth={2} />
+                  {t('product.addToCart')}
                 </>
               )}
             </Button>
           </div>
 
           {!inStock && (
-            <p className="mt-4 text-sm text-red-400">{t('product.unavailable')}</p>
+            <p className="mt-3 text-sm text-danger">{t('product.unavailable')}</p>
           )}
         </motion.div>
       </div>

@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import ErrorBoundary from './components/ErrorBoundary'
 import Layout from './components/Layout'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
@@ -15,27 +16,29 @@ import OrdersPage from './pages/OrdersPage'
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <LanguageProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <CartProvider>
-            <Routes>
-              <Route element={<Layout />}>
-                <Route index element={<HomePage />} />
-                <Route path="kategoria/:slug" element={<CategoryPage />} />
-                <Route path="produkt/:id" element={<ProductDetailPage />} />
-                <Route path="koszyk" element={<CartPage />} />
-                <Route path="checkout" element={<CheckoutPage />} />
-                <Route path="logowanie" element={<LoginPage />} />
-                <Route path="rejestracja" element={<RegisterPage />} />
-                <Route path="zamowienia" element={<OrdersPage />} />
-              </Route>
-            </Routes>
-            </CartProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <LanguageProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <CartProvider>
+                <Routes>
+                  <Route element={<Layout />}>
+                    <Route index element={<HomePage />} />
+                    <Route path="kategoria/:slug" element={<CategoryPage />} />
+                    <Route path="produkt/:id" element={<ProductDetailPage />} />
+                    <Route path="koszyk" element={<CartPage />} />
+                    <Route path="checkout" element={<CheckoutPage />} />
+                    <Route path="logowanie" element={<LoginPage />} />
+                    <Route path="rejestracja" element={<RegisterPage />} />
+                    <Route path="zamowienia" element={<OrdersPage />} />
+                  </Route>
+                </Routes>
+              </CartProvider>
+            </ToastProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

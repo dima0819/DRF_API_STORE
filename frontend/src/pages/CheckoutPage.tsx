@@ -5,6 +5,8 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { createOrder } from '../api/orders'
 import { formatPrice, getErrorMessage } from '../api/client'
 import Button from '../components/Button'
+import Input from '../components/Input'
+import Skeleton from '../components/Skeleton'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -78,8 +80,8 @@ export default function CheckoutPage() {
   // Cart is still being fetched — don't redirect away prematurely
   if (!success && (cartLoading || cart === null)) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-        <div className="h-64 animate-pulse rounded-2xl bg-surface-card" />
+      <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
+        <Skeleton className="h-72" rounded="xl" />
       </div>
     )
   }
@@ -111,24 +113,26 @@ export default function CheckoutPage() {
 
   if (success) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6">
+      <div className="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="rounded-2xl border border-brand-500/20 bg-surface-card p-12"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
+          className="rounded-xl border border-line bg-surface p-9"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', delay: 0.2 }}
+          <motion.span
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.08, ease: [0.34, 1.26, 0.64, 1] }}
+            className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-400/12"
           >
-            <CheckCircle className="mx-auto h-20 w-20 text-brand-400" />
-          </motion.div>
-          <h1 className="mt-6 text-2xl font-bold text-white">{t('checkout.successTitle')}</h1>
-          <p className="mt-3 text-gray-400">
+            <CheckCircle className="h-8 w-8 text-accent-400" strokeWidth={1.75} />
+          </motion.span>
+          <h1 className="mt-6 text-xl font-bold tracking-tight">{t('checkout.successTitle')}</h1>
+          <p className="mt-2.5 text-sm leading-relaxed text-content-muted">
             {t('checkout.successText', { id: orderId ?? '' })}
           </p>
-          <div className="mt-8 flex flex-col gap-3">
+          <div className="mt-7 flex flex-col gap-2.5">
             <Button onClick={() => navigate('/zamowienia')}>{t('checkout.myOrders')}</Button>
             <Button variant="secondary" onClick={() => navigate('/')}>
               {t('checkout.continueShopping')}
@@ -139,165 +143,157 @@ export default function CheckoutPage() {
     )
   }
 
-  const inputClass =
-    'w-full rounded-xl border border-brand-500/15 bg-surface-elevated px-4 py-2.5 text-white placeholder-gray-500 outline-none transition-colors focus:border-brand-500/40'
-
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-white">{t('checkout.title')}</h1>
-      <p className="mt-2 text-gray-400">{t('checkout.subtitle')}</p>
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        {t('checkout.title')}
+      </h1>
+      <p className="mt-1.5 text-sm text-content-muted">{t('checkout.subtitle')}</p>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-5">
-        <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-6">
-          <div className="rounded-2xl border border-brand-500/10 bg-surface-card p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="h-5 w-5 text-brand-400" />
-              <h2 className="font-semibold text-white">{t('checkout.addressHeader')}</h2>
-            </div>
+      <div className="mt-7 grid gap-6 lg:grid-cols-[1fr_20rem] lg:items-start">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <section className="rounded-xl border border-line bg-surface p-5 sm:p-6">
+            <h2 className="flex items-center gap-2 text-sm font-semibold">
+              <MapPin className="h-4 w-4 text-accent-400" strokeWidth={1.75} />
+              {t('checkout.addressHeader')}
+            </h2>
 
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="recipient" className="block text-sm font-medium text-gray-400 mb-1.5">
-                  {t('checkout.recipient')}
-                </label>
-                <input
-                  id="recipient"
-                  value={form.recipient}
-                  onChange={(e) => update('recipient', e.target.value)}
-                  autoComplete="name"
-                  placeholder="Jan Kowalski"
-                  className={inputClass}
+            <div className="mt-5 space-y-4">
+              <Input
+                label={t('checkout.recipient')}
+                value={form.recipient}
+                onChange={(event) => update('recipient', event.target.value)}
+                autoComplete="name"
+                placeholder="Jan Kowalski"
+                required
+              />
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <Input
+                  className="sm:col-span-2"
+                  label={t('checkout.street')}
+                  value={form.street}
+                  onChange={(event) => update('street', event.target.value)}
+                  autoComplete="address-line1"
+                  placeholder="Sportowa"
+                  required
+                />
+                <Input
+                  label={t('checkout.houseNumber')}
+                  value={form.houseNumber}
+                  onChange={(event) => update('houseNumber', event.target.value)}
+                  autoComplete="address-line2"
+                  placeholder="12/3"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="sm:col-span-2">
-                  <label htmlFor="street" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    {t('checkout.street')}
-                  </label>
-                  <input
-                    id="street"
-                    value={form.street}
-                    onChange={(e) => update('street', e.target.value)}
-                    autoComplete="address-line1"
-                    placeholder="Sportowa"
-                    className={inputClass}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="houseNumber" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    {t('checkout.houseNumber')}
-                  </label>
-                  <input
-                    id="houseNumber"
-                    value={form.houseNumber}
-                    onChange={(e) => update('houseNumber', e.target.value)}
-                    autoComplete="address-line2"
-                    placeholder="12/3"
-                    className={inputClass}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                  <label htmlFor="postalCode" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    {t('checkout.postalCode')}
-                  </label>
-                  <input
-                    id="postalCode"
-                    value={form.postalCode}
-                    onChange={(e) => update('postalCode', formatPostalCode(e.target.value))}
-                    autoComplete="postal-code"
-                    placeholder="00-000"
-                    inputMode="numeric"
-                    maxLength={6}
-                    className={inputClass}
-                    required
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-400 mb-1.5">
-                    {t('checkout.city')}
-                  </label>
-                  <input
-                    id="city"
-                    value={form.city}
-                    onChange={(e) => update('city', e.target.value)}
-                    autoComplete="address-level2"
-                    placeholder="Warszawa"
-                    className={inputClass}
-                    required
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <Input
+                  label={t('checkout.postalCode')}
+                  value={form.postalCode}
+                  onChange={(event) =>
+                    update('postalCode', formatPostalCode(event.target.value))
+                  }
+                  autoComplete="postal-code"
+                  placeholder="00-000"
+                  inputMode="numeric"
+                  maxLength={6}
+                  required
+                />
+                <Input
+                  className="sm:col-span-2"
+                  label={t('checkout.city')}
+                  value={form.city}
+                  onChange={(event) => update('city', event.target.value)}
+                  autoComplete="address-level2"
+                  placeholder="Warszawa"
+                  required
+                />
               </div>
 
               <div>
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-400 mb-1.5">
-                  {t('checkout.notes')} <span className="text-gray-600">{t('checkout.optional')}</span>
+                <label
+                  htmlFor="checkout-notes"
+                  className="mb-1.5 block text-xs font-medium text-content-muted"
+                >
+                  {t('checkout.notes')}{' '}
+                  <span className="text-content-subtle">{t('checkout.optional')}</span>
                 </label>
                 <textarea
-                  id="notes"
+                  id="checkout-notes"
                   value={form.notes}
-                  onChange={(e) => update('notes', e.target.value)}
+                  onChange={(event) => update('notes', event.target.value)}
                   placeholder={t('checkout.notesPlaceholder')}
                   rows={2}
-                  className={`${inputClass} resize-none`}
+                  className="w-full resize-none rounded-lg border border-line bg-raised px-3.5 py-2.5 text-sm text-content outline-none transition-colors placeholder:text-content-subtle hover:border-line-strong focus:border-accent-400"
                 />
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="flex items-start gap-3 rounded-xl border border-brand-500/10 bg-brand-500/5 p-4">
-            <ShieldCheck className="h-5 w-5 shrink-0 text-brand-400 mt-0.5" />
-            <p className="text-sm text-gray-400">{t('checkout.info')}</p>
+          <div className="flex items-start gap-2.5 rounded-lg border border-line bg-surface px-4 py-3">
+            <ShieldCheck
+              className="mt-0.5 h-4 w-4 shrink-0 text-accent-400"
+              strokeWidth={1.75}
+            />
+            <p className="text-xs leading-relaxed text-content-muted">
+              {t('checkout.info')}
+            </p>
           </div>
 
           {error && (
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18 }}
+              role="alert"
+              className="rounded-lg border border-danger/25 bg-danger/12 px-3.5 py-2.5 text-sm text-danger"
             >
               {error}
             </motion.p>
           )}
 
-          <Button type="submit" loading={loading} className="w-full sm:w-auto">
+          <Button
+            type="submit"
+            size="lg"
+            loading={loading}
+            className="w-full sm:w-auto"
+          >
             {t('checkout.submit')}
           </Button>
         </form>
 
-        <div className="lg:col-span-2">
-          <div className="sticky top-24 rounded-2xl border border-brand-500/10 bg-surface-card p-6">
-            <h2 className="font-semibold text-white">{t('checkout.summary')}</h2>
-            <ul className="mt-4 space-y-3">
-              {cart?.items.map((item) => (
-                <li key={item.id} className="flex justify-between text-sm">
-                  <span className="text-gray-400">
-                    {item.product.name} × {item.quantity}
-                  </span>
-                  <span className="text-gray-300">{formatPrice(item.total_price)}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-4 border-t border-brand-500/10 pt-4 flex justify-between">
-              <span className="font-semibold text-white">{t('cart.total')}</span>
-              <span className="text-xl font-bold text-brand-400">
-                {formatPrice(cart?.total_cart_price ?? '0')}
-              </span>
-            </div>
-            <Link
-              to="/koszyk"
-              className="mt-4 block text-center text-sm text-brand-400 hover:text-brand-300"
-            >
-              {t('checkout.backToCart')}
-            </Link>
+        <aside className="rounded-xl border border-line bg-surface p-5 lg:sticky lg:top-24">
+          <h2 className="text-sm font-semibold">{t('checkout.summary')}</h2>
+          <ul className="mt-4 space-y-2.5">
+            {cart?.items.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-baseline justify-between gap-3 text-sm"
+              >
+                <span className="min-w-0 text-content-muted">
+                  {item.product.name} × {item.quantity}
+                </span>
+                <span className="shrink-0 tabular-nums text-content">
+                  {formatPrice(item.total_price)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex items-baseline justify-between border-t border-line pt-4">
+            <span className="text-sm text-content-muted">{t('cart.total')}</span>
+            <span className="text-xl font-bold tabular-nums tracking-tight">
+              {formatPrice(cart?.total_cart_price ?? '0')}
+            </span>
           </div>
-        </div>
+          <Link
+            to="/koszyk"
+            className="mt-4 block text-center text-xs text-content-subtle transition-colors hover:text-content-muted"
+          >
+            {t('checkout.backToCart')}
+          </Link>
+        </aside>
       </div>
     </div>
   )

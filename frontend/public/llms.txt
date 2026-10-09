@@ -1,0 +1,17 @@
+# MotionGear
+
+> Sklep internetowy ze sprzętem sportowym — piłki, sztangi, fitness, sporty zimowe, rowery i bieganie. Projekt demonstracyjny (Django REST Framework + React).
+
+## Kategorie
+
+- [Piłki](https://motiongear.duckdns.org/kategoria/pilki): piłki do piłki nożnej, koszykówki i siatkówki
+- [Sztangi](https://motiongear.duckdns.org/kategoria/sztangi): sztangi, hantle i akcesoria do treningu siłowego
+- [Fitness](https://motiongear.duckdns.org/kategoria/fitness): maty, taśmy oporowe, kettlebell
+- [Sporty zimowe](https://motiongear.duckdns.org/kategoria/sporty-zimowe): narty, snowboard, kijki
+- [Rowery](https://motiongear.duckdns.org/kategoria/rowery): rowery szosowe, górskie i akcesoria
+- [Bieganie](https://motiongear.duckdns.org/kategoria/bieganie): buty, odzież i akcesoria dla biegaczy
+
+## Uwagi
+
+- Sklep jest projektem demonstracyjnym — zamówienia nie są realizowane.
+- Interfejs dostępny w języku polskim i angielskim.

@@ -2,7 +2,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -24,14 +23,11 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  // Read the stored token during the first render: a guarded route renders
+  // before any effect runs, so deferring this would bounce a logged-in user
+  // to the login screen on a full page load.
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!getAccessToken())
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    setIsAuthenticated(!!getAccessToken())
-    setIsLoading(false)
-  }, [])
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     setError(null)
@@ -63,14 +59,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       isAuthenticated,
-      isLoading,
+      isLoading: false,
       login,
       register,
       logout,
       error,
       clearError: () => setError(null),
     }),
-    [isAuthenticated, isLoading, login, register, logout, error],
+    [isAuthenticated, login, register, logout, error],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

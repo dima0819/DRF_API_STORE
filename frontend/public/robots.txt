@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /koszyk
+Disallow: /zamowienia
+Disallow: /logowanie
+Disallow: /rejestracja
+
+Sitemap: https://motiongear.duckdns.org/sitemap.xml

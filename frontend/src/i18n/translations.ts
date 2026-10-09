@@ -17,9 +17,10 @@ const pl = {
   'home.heroText':
     'Odkryj profesjonalny sprzęt sportowy — piłki, sztangi, rowery i więcej. Wybierz kategorię i znajdź idealny sprzęt dla siebie.',
   'home.browseCategories': 'Przeglądaj kategorie',
-  'home.stat.products': '500+ produktów',
-  'home.stat.delivery': 'Szybka dostawa',
-  'home.stat.brands': 'Top marki',
+  'home.stat.delivery': 'Dostawa 24–48 h',
+  'home.stat.warranty': '2 lata gwarancji',
+  'home.stat.returns': '30 dni na zwrot',
+  'home.categoryCount': '{n} kategorii',
   'home.choose': 'Wybierz',
   'home.chooseAccent': 'kategorię',
   'home.chooseText': 'Przeglądaj sprzęt według dyscypliny sportowej',
@@ -27,7 +28,8 @@ const pl = {
   'category.back': 'Wróć do kategorii',
   'category.searchPlaceholder': 'Szukaj produktu...',
   'category.empty': 'Brak produktów w tej kategorii.',
-  'card.browse': 'Przeglądaj →',
+  'category.productsHeading': 'Produkty w kategorii',
+  'card.browse': 'Przeglądaj',
   'product.outOfStock': 'Brak na stanie',
   'product.lastFew': 'Ostatnie sztuki',
   'product.lastN': 'Ostatnie {n} szt.',
@@ -91,16 +93,22 @@ const pl = {
   'register.submit': 'Zarejestruj się',
   'register.haveAccount': 'Masz już konto?',
   'register.loginLink': 'Zaloguj się',
+  'register.passwordHint': 'Minimum {n} znaków',
   'orders.title': 'Moje zamówienia',
   'orders.subtitle': 'Historia Twoich zakupów w MotionGear',
-  'orders.empty': 'Nie masz jeszcze żadnych zamówień.',
-  'orders.startShopping': 'Rozpocznij zakupy →',
+  'orders.empty': 'Brak zamówień',
+  'orders.emptyText': 'Nie masz jeszcze żadnych zamówień. Zacznij od przeglądania katalogu.',
+  'orders.startShopping': 'Rozpocznij zakupy',
   'orders.order': 'Zamówienie',
   'orders.paid': 'Opłacone',
   'orders.pending': 'Oczekuje na płatność',
   'orders.address': 'Adres:',
   'errors.generic': 'Wystąpił błąd',
   'errors.unexpected': 'Wystąpił nieoczekiwany błąd',
+  'errors.boundaryTitle': 'Coś poszło nie tak',
+  'errors.boundaryText': 'Przepraszamy — strona napotkała nieoczekiwany błąd. Spróbuj odświeżyć.',
+  'errors.boundaryRetry': 'Odśwież stronę',
+  'errors.boundaryHome': 'Wróć na stronę główną',
 }
 
 const en: Record<TranslationKey, string> = {
@@ -120,9 +128,10 @@ const en: Record<TranslationKey, string> = {
   'home.heroText':
     'Discover professional sports gear — balls, barbells, bikes and more. Pick a category and find the perfect equipment for you.',
   'home.browseCategories': 'Browse categories',
-  'home.stat.products': '500+ products',
-  'home.stat.delivery': 'Fast delivery',
-  'home.stat.brands': 'Top brands',
+  'home.stat.delivery': 'Delivery in 24–48 h',
+  'home.stat.warranty': '2-year warranty',
+  'home.stat.returns': '30-day returns',
+  'home.categoryCount': '{n} categories',
   'home.choose': 'Choose a',
   'home.chooseAccent': 'category',
   'home.chooseText': 'Browse gear by sport discipline',
@@ -130,7 +139,8 @@ const en: Record<TranslationKey, string> = {
   'category.back': 'Back to categories',
   'category.searchPlaceholder': 'Search products...',
   'category.empty': 'No products in this category.',
-  'card.browse': 'Browse →',
+  'category.productsHeading': 'Products in this category',
+  'card.browse': 'Browse',
   'product.outOfStock': 'Out of stock',
   'product.lastFew': 'Last items',
   'product.lastN': 'Only {n} left',
@@ -194,16 +204,22 @@ const en: Record<TranslationKey, string> = {
   'register.submit': 'Sign up',
   'register.haveAccount': 'Already have an account?',
   'register.loginLink': 'Log in',
+  'register.passwordHint': 'At least {n} characters',
   'orders.title': 'My orders',
   'orders.subtitle': 'Your purchase history at MotionGear',
-  'orders.empty': "You don't have any orders yet.",
-  'orders.startShopping': 'Start shopping →',
+  'orders.empty': 'No orders yet',
+  'orders.emptyText': "You haven't placed any orders yet. Start by browsing the catalog.",
+  'orders.startShopping': 'Start shopping',
   'orders.order': 'Order',
   'orders.paid': 'Paid',
   'orders.pending': 'Awaiting payment',
   'orders.address': 'Address:',
   'errors.generic': 'Something went wrong',
   'errors.unexpected': 'An unexpected error occurred',
+  'errors.boundaryTitle': 'Something went wrong',
+  'errors.boundaryText': 'Sorry — the page hit an unexpected error. Try reloading.',
+  'errors.boundaryRetry': 'Reload page',
+  'errors.boundaryHome': 'Back to home',
 }
 
 export type TranslationKey = keyof typeof pl
@@ -238,14 +254,15 @@ export function setStoredLang(lang: Lang): void {
 export function translate(
   key: TranslationKey,
   params?: Record<string, string | number>,
+  lang: Lang = currentLang,
 ): string {
-  let text = translations[currentLang][key]
-  if (params) {
-    for (const [name, value] of Object.entries(params)) {
-      text = text.replace(`{${name}}`, String(value))
-    }
-  }
-  return text
+  const dictionary = translations[lang] ?? translations.pl
+  const template = dictionary[key] ?? translations.pl[key] ?? key
+  if (!params) return template
+  return Object.entries(params).reduce(
+    (text, [name, value]) => text.replace(`{${name}}`, String(value)),
+    template,
+  )
 }
 
 export function productsWord(count: number, lang: Lang): string {

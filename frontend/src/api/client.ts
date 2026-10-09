@@ -94,19 +94,25 @@ function locale(): string {
   return getLang() === 'en' ? 'en-GB' : 'pl-PL'
 }
 
+const MISSING_VALUE = '—'
+
 export function formatPrice(value: string | number): string {
-  const num = typeof value === 'string' ? parseFloat(value) : value
+  const parsed = typeof value === 'string' ? parseFloat(value) : value
+  const amount = Number.isFinite(parsed) ? parsed : 0
   return new Intl.NumberFormat(locale(), {
     style: 'currency',
     currency: 'PLN',
-  }).format(num)
+  }).format(amount)
 }
 
 export function formatDate(iso: string): string {
+  if (!iso) return MISSING_VALUE
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return MISSING_VALUE
   return new Intl.DateTimeFormat(locale(), {
     dateStyle: 'long',
     timeStyle: 'short',
-  }).format(new Date(iso))
+  }).format(date)
 }
 
 export function getErrorMessage(error: unknown): string {

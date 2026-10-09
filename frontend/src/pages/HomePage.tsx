@@ -1,11 +1,18 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, Sparkles, Trophy, Zap } from 'lucide-react'
+import { ArrowRight, PackageCheck, ShieldCheck, Truck } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { fetchCategories } from '../api/products'
 import CategoryCard from '../components/CategoryCard'
+import Skeleton from '../components/Skeleton'
 import { useLanguage } from '../context/LanguageContext'
 import type { Category } from '../types'
+
+const FADE_UP = {
+  initial: { opacity: 0, y: 14 },
+  animate: { opacity: 1, y: 0 },
+}
+
+const EASE = [0.25, 1, 0.5, 1] as const
 
 export default function HomePage() {
   const { t } = useLanguage()
@@ -15,141 +22,121 @@ export default function HomePage() {
   useEffect(() => {
     fetchCategories()
       .then(setCategories)
-      .catch(console.error)
+      .catch(() => setCategories([]))
       .finally(() => setLoading(false))
   }, [])
 
-  const stats = [
-    { icon: Trophy, label: t('home.stat.products') },
-    { icon: Zap, label: t('home.stat.delivery') },
-    { icon: Sparkles, label: t('home.stat.brands') },
+  const assurances = [
+    { icon: Truck, label: t('home.stat.delivery') },
+    { icon: ShieldCheck, label: t('home.stat.warranty') },
+    { icon: PackageCheck, label: t('home.stat.returns') },
   ]
 
   return (
     <div>
-      {/* Hero */}
-      <section className="hero-glow relative overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            animate={{ y: [0, -20, 0], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute top-20 right-[10%] h-64 w-64 rounded-full bg-brand-500/10 blur-3xl"
-          />
-          <motion.div
-            animate={{ y: [0, 20, 0], opacity: [0.2, 0.5, 0.2] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute bottom-10 left-[5%] h-48 w-48 rounded-full bg-teal-500/10 blur-3xl"
-          />
-        </div>
+      <section className="relative overflow-hidden border-b border-line">
+        <div className="hero-aura pointer-events-none absolute inset-0" />
+        <div className="grid-lines pointer-events-none absolute inset-0 opacity-40" />
 
-        <div className="relative mx-auto max-w-7xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-flex items-center gap-2 rounded-full border border-brand-500/20 bg-brand-500/10 px-4 py-1.5 text-sm font-medium text-brand-300">
-              <Sparkles className="h-4 w-4" />
+        <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+          <div className="max-w-2xl">
+            <motion.span
+              {...FADE_UP}
+              transition={{ duration: 0.3, ease: EASE }}
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-content-muted"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-400" />
               {t('home.badge')}
-            </span>
-          </motion.div>
+            </motion.span>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl"
-          >
-            {t('home.hero1')}{' '}
-            <span className="gradient-text">{t('home.heroAccent')}</span>
-            <br />
-            {t('home.hero2')}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mx-auto mt-6 max-w-2xl text-lg text-gray-400"
-          >
-            {t('home.heroText')}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-4"
-          >
-            <a
-              href="#kategorie"
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-500 px-6 py-3 font-semibold text-white shadow-lg shadow-brand-500/30 transition-all hover:bg-brand-400 hover:shadow-brand-400/30"
+            <motion.h1
+              {...FADE_UP}
+              transition={{ duration: 0.35, delay: 0.05, ease: EASE }}
+              className="mt-6 text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.5rem]"
             >
-              {t('home.browseCategories')}
-              <ArrowRight className="h-4 w-4" />
-            </a>
-            <Link
-              to="/koszyk"
-              className="inline-flex items-center gap-2 rounded-xl border border-brand-500/20 bg-surface-elevated px-6 py-3 font-semibold text-brand-300 transition-all hover:border-brand-500/40"
-            >
-              {t('nav.cart')}
-            </Link>
-          </motion.div>
+              {t('home.hero1')}{' '}
+              <span className="text-gradient">{t('home.heroAccent')}</span>{' '}
+              {t('home.hero2')}
+            </motion.h1>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-16 grid grid-cols-3 gap-6 max-w-lg mx-auto"
-          >
-            {stats.map(({ icon: Icon, label }) => (
-              <div key={label} className="flex flex-col items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/10 text-brand-400">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <span className="text-xs text-gray-500">{label}</span>
-              </div>
-            ))}
-          </motion.div>
+            <motion.p
+              {...FADE_UP}
+              transition={{ duration: 0.35, delay: 0.1, ease: EASE }}
+              className="mt-5 max-w-xl text-base leading-relaxed text-content-muted"
+            >
+              {t('home.heroText')}
+            </motion.p>
+
+            <motion.div
+              {...FADE_UP}
+              transition={{ duration: 0.35, delay: 0.15, ease: EASE }}
+              className="mt-8 flex flex-wrap items-center gap-3"
+            >
+              <a
+                href="#kategorie"
+                className="inline-flex h-12 items-center gap-2 rounded-lg bg-accent-400 px-6 text-sm font-semibold text-accent-ink transition-colors duration-150 hover:bg-accent-300"
+              >
+                {t('home.browseCategories')}
+                <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+              </a>
+            </motion.div>
+
+            <motion.ul
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.25 }}
+              className="mt-12 flex flex-wrap gap-x-7 gap-y-3 border-t border-line pt-6"
+            >
+              {assurances.map(({ icon: Icon, label }) => (
+                <li
+                  key={label}
+                  className="flex items-center gap-2 text-xs text-content-subtle"
+                >
+                  <Icon className="h-4 w-4 text-accent-400" strokeWidth={1.75} />
+                  {label}
+                </li>
+              ))}
+            </motion.ul>
+          </div>
         </div>
       </section>
 
-      {/* Categories */}
-      <section id="kategorie" className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-10 text-center"
-          >
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
-              {t('home.choose')} <span className="gradient-text">{t('home.chooseAccent')}</span>
+      <section id="kategorie" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              {t('home.choose')}{' '}
+              <span className="text-accent-400">{t('home.chooseAccent')}</span>
             </h2>
-            <p className="mt-3 text-gray-400">{t('home.chooseText')}</p>
-          </motion.div>
-
-          {loading ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-64 animate-pulse rounded-2xl bg-surface-card" />
-              ))}
-            </div>
-          ) : categories.length === 0 ? (
-            <div className="rounded-2xl border border-brand-500/10 bg-surface-card p-12 text-center">
-              <p className="text-gray-400">{t('home.noCategories')}</p>
-              <code className="mt-2 block text-sm text-brand-400">
-                python manage.py seed_sports_store
-              </code>
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((cat, i) => (
-                <CategoryCard key={cat.id} category={cat} index={i} />
-              ))}
-            </div>
+            <p className="mt-2 text-sm text-content-muted">{t('home.chooseText')}</p>
+          </div>
+          {!loading && categories.length > 0 && (
+            <span className="text-xs tabular-nums text-content-subtle">
+              {t('home.categoryCount', { n: categories.length })}
+            </span>
           )}
         </div>
+
+        {loading ? (
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-44" rounded="xl" />
+            ))}
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="mt-8 rounded-xl border border-line bg-surface p-10 text-center">
+            <p className="text-sm text-content-muted">{t('home.noCategories')}</p>
+            <code className="mt-3 inline-block rounded-md bg-raised px-3 py-1.5 text-xs text-accent-300">
+              python manage.py seed_sports_store
+            </code>
+          </div>
+        ) : (
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((category, index) => (
+              <CategoryCard key={category.id} category={category} index={index} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   )

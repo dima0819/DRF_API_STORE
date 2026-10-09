@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   apiFetch,
+  formatDate,
   formatPrice,
   getAccessToken,
   getErrorMessage,
   setTokens,
 } from '../api/client'
+import { setStoredLang } from '../i18n/translations'
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -23,6 +25,41 @@ describe('formatPrice', () => {
 
   it('formats numeric prices', () => {
     expect(formatPrice(20)).toContain('20,00')
+  })
+
+  it('renders a zero price rather than NaN for unparseable input', () => {
+    expect(formatPrice('abc')).not.toContain('NaN')
+  })
+
+  it('renders a zero price rather than NaN for a missing value', () => {
+    expect(formatPrice(undefined as unknown as string)).not.toContain('NaN')
+  })
+})
+
+describe('formatDate', () => {
+  it('formats a valid ISO timestamp', () => {
+    expect(formatDate('2026-10-09T12:47:00Z')).toContain('2026')
+  })
+
+  it('returns a fallback instead of throwing on an empty string', () => {
+    expect(() => formatDate('')).not.toThrow()
+    expect(formatDate('')).toBe('—')
+  })
+
+  it('returns a fallback instead of throwing on an unparseable value', () => {
+    expect(() => formatDate('not-a-date')).not.toThrow()
+    expect(formatDate('not-a-date')).toBe('—')
+  })
+
+  it('returns a fallback when the value is missing entirely', () => {
+    expect(() => formatDate(undefined as unknown as string)).not.toThrow()
+    expect(formatDate(undefined as unknown as string)).toBe('—')
+  })
+
+  it('does not throw with the English locale active', () => {
+    setStoredLang('en')
+    expect(() => formatDate('')).not.toThrow()
+    setStoredLang('pl')
   })
 })
 

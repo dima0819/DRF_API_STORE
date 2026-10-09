@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-  getCategoryVisual,
-  getProductImage,
-  slugifyCategoryName,
-} from '../config/categories'
+import { getCategoryVisual, slugifyCategoryName } from '../config/categories'
+import { getProductPhoto } from '../config/productImages'
 
 const KNOWN_SLUGS = ['pilki', 'sztangi', 'fitness', 'sporty-zimowe', 'rowery', 'bieganie']
 
@@ -16,56 +13,52 @@ describe('slugifyCategoryName', () => {
 })
 
 describe('getCategoryVisual', () => {
-  it('every known category has a real image URL (not an HTML page)', () => {
-    for (const slug of KNOWN_SLUGS) {
-      const { image } = getCategoryVisual(slug)
-      expect(image).toMatch(/^https:\/\/images\.unsplash\.com\//)
-      expect(image).not.toContain('google.com')
-    }
+  it('every known category has its own icon', () => {
+    const icons = KNOWN_SLUGS.map((slug) => getCategoryVisual(slug).icon)
+    icons.forEach((icon) => expect(icon).toBeTruthy())
+    expect(new Set(icons).size).toBe(KNOWN_SLUGS.length)
   })
 
   it('unknown slug falls back to the default visual', () => {
-    expect(getCategoryVisual('nieznana').image).toMatch(
-      /^https:\/\/images\.unsplash\.com\//,
-    )
+    const fallback = getCategoryVisual('nieznana')
+    expect(fallback.icon).toBeTruthy()
+    expect(fallback.slug).toBe('nieznana')
   })
 })
 
-describe('getProductImage', () => {
-  it('matches products to photos by name, not at random', () => {
-    const ski = getProductImage('Narty zjazdowe All-Mountain', 'sporty-zimowe')
-    const football = getProductImage('Piłka do piłki nożnej Pro', 'pilki')
-    expect(ski).not.toBe(football)
-    expect(football).toContain('1575361204480')
+describe('getProductPhoto', () => {
+  it('matches products to local photos by name, not at random', () => {
+    expect(getProductPhoto('Narty zjazdowe All-Mountain')).toBe('/products/narty.jpg')
+    expect(getProductPhoto('Piłka do piłki nożnej Pro')).toBe('/products/pilka-nozna.jpg')
   })
 
-  it('distinguishes products within the same category', () => {
-    const football = getProductImage('Piłka do piłki nożnej Pro', 'pilki')
-    const basketball = getProductImage('Piłka do koszykówki Street', 'pilki')
-    const volleyball = getProductImage('Piłka do siatkówki Beach', 'pilki')
+  it('gives each ball type its own photo', () => {
+    const football = getProductPhoto('Piłka do piłki nożnej Pro')
+    const basketball = getProductPhoto('Piłka do koszykówki Street')
+    const volleyball = getProductPhoto('Piłka do siatkówki Beach')
     expect(new Set([football, basketball, volleyball]).size).toBe(3)
   })
 
-  it('helmet gets a cycling photo, not a generic bike', () => {
-    const helmet = getProductImage('Kask rowerowy Pro', 'rowery')
-    const mtb = getProductImage('Rower górski Trail X', 'rowery')
-    expect(helmet).not.toBe(mtb)
+  it('does not give skis to ski poles', () => {
+    expect(getProductPhoto('Kijki narciarskie Carbon')).toBe(
+      '/products/kijki-narciarskie.jpg',
+    )
+    expect(getProductPhoto('Narty zjazdowe All-Mountain')).toBe('/products/narty.jpg')
   })
 
-  it('ski poles do not reuse the ski product photo', () => {
-    const poles = getProductImage('Kijki narciarskie Carbon', 'sporty-zimowe')
-    const ski = getProductImage('Narty zjazdowe All-Mountain', 'sporty-zimowe')
-    expect(poles).not.toBe(ski)
+  it('returns null for products without a photo so artwork can take over', () => {
+    expect(getProductPhoto('Produkt zupełnie nowy')).toBeNull()
+    expect(getProductPhoto('Zestaw taśm oporowych')).toBeNull()
   })
 
-  it('unmatched product falls back to its category image', () => {
-    const fallback = getProductImage('Produkt zupełnie nowy', 'pilki')
-    expect(fallback).toBe(getCategoryVisual('pilki').image)
+  it('does not give a bike photo to the helmet', () => {
+    expect(getProductPhoto('Kask rowerowy Pro')).toBe('/products/kask-rowerowy.jpg')
+    expect(getProductPhoto('Rower szosowy Aero')).toBe('/products/rower-szosowy.jpg')
   })
 
-  it('is deterministic for the same product', () => {
-    const a = getProductImage('Zegarek sportowy GPS', 'bieganie')
-    const b = getProductImage('Zegarek sportowy GPS', 'bieganie')
-    expect(a).toBe(b)
+  it('is stable across calls', () => {
+    expect(getProductPhoto('Zegarek sportowy GPS')).toBe(
+      getProductPhoto('Zegarek sportowy GPS'),
+    )
   })
 })

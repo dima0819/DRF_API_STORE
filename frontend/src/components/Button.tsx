@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Size = 'sm' | 'md' | 'lg'
 
 // framer-motion's motion.button redefines these DOM handlers with its own
 // signatures, so they must be excluded before spreading props into it
@@ -11,37 +12,57 @@ interface ButtonProps
     'onAnimationStart' | 'onDrag' | 'onDragStart' | 'onDragEnd'
   > {
   variant?: Variant
+  size?: Size
   loading?: boolean
   children: ReactNode
 }
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-brand-500 hover:bg-brand-400 text-white shadow-lg shadow-brand-500/25 hover:shadow-brand-400/30',
+    'bg-accent-400 text-accent-ink hover:bg-accent-300 active:bg-accent-500 shadow-mid',
   secondary:
-    'bg-surface-elevated hover:bg-brand-900/40 text-brand-300 border border-brand-500/20 hover:border-brand-500/40',
-  ghost: 'bg-transparent hover:bg-brand-500/10 text-brand-300 hover:text-brand-200',
-  danger: 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20',
+    'bg-raised text-content border border-line hover:border-line-strong hover:bg-overlay',
+  ghost: 'bg-transparent text-content-muted hover:bg-raised hover:text-content',
+  danger:
+    'bg-danger/12 text-danger border border-danger/25 hover:bg-danger/20 hover:border-danger/40',
 }
+
+const sizes: Record<Size, string> = {
+  sm: 'h-9 px-3.5 text-xs gap-1.5 rounded-md',
+  md: 'h-11 px-5 text-sm gap-2 rounded-lg',
+  lg: 'h-13 px-7 text-base gap-2.5 rounded-xl',
+}
+
+const BASE =
+  'relative inline-flex select-none items-center justify-center font-semibold ' +
+  'transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45'
 
 export default function Button({
   variant = 'primary',
-  loading,
+  size = 'md',
+  loading = false,
   children,
   className = '',
   disabled,
   ...props
 }: ButtonProps) {
+  const inert = disabled || loading
+
   return (
     <motion.button
-      whileHover={{ scale: disabled || loading ? 1 : 1.02 }}
-      whileTap={{ scale: disabled || loading ? 1 : 0.98 }}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${className}`}
-      disabled={disabled || loading}
+      whileHover={inert ? undefined : { y: -1 }}
+      whileTap={inert ? undefined : { y: 0, scale: 0.985 }}
+      transition={{ duration: 0.15, ease: [0.25, 1, 0.5, 1] }}
+      className={`${BASE} ${sizes[size]} ${variants[variant]} ${className}`}
+      disabled={inert}
+      aria-busy={loading || undefined}
       {...props}
     >
       {loading && (
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <span
+          aria-hidden="true"
+          className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+        />
       )}
       {children}
     </motion.button>

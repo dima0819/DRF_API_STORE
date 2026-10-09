@@ -28,7 +28,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = lang
-    document.title = translate('meta.title')
+    document.title = translate('meta.title', undefined, lang)
   }, [lang])
 
   const setLang = useCallback((next: Lang) => {
@@ -38,7 +38,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = useCallback(
     (key: TranslationKey, params?: Record<string, string | number>) =>
-      translate(key, params),
+      translate(key, params, lang),
     [lang],
   )
 

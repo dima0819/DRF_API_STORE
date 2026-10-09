@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
 import ProductCard from '../components/ProductCard'
-import { getProductImage } from '../config/categories'
 import { LanguageProvider } from '../context/LanguageContext'
 import { makeProduct } from './fixtures'
 
@@ -18,19 +17,21 @@ function renderCard(...props: Parameters<typeof ProductCard>) {
 }
 
 describe('ProductCard', () => {
-  it('renders name, category, formatted price and a matching photo', () => {
+  it('renders name, category and formatted price', () => {
     const product = makeProduct()
     renderCard({ product })
 
     expect(screen.getByText('Piłka do piłki nożnej Pro')).toBeInTheDocument()
     expect(screen.getByText('Piłki')).toBeInTheDocument()
     expect(screen.getByText(/89,99/)).toBeInTheDocument()
+  })
 
-    const img = screen.getByRole('img', { name: 'Piłka do piłki nożnej Pro' })
-    expect(img).toHaveAttribute(
-      'src',
-      getProductImage('Piłka do piłki nożnej Pro', 'pilki'),
-    )
+  it('links to the product detail page', () => {
+    renderCard({ product: makeProduct({ id: 42 }) })
+
+    const links = screen.getAllByRole('link', { name: /Piłka do piłki nożnej Pro/ })
+    expect(links.length).toBeGreaterThan(0)
+    links.forEach((link) => expect(link).toHaveAttribute('href', '/produkt/42'))
   })
 
   it('marks out-of-stock products and disables adding to cart', () => {

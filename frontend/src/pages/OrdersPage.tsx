@@ -1,9 +1,13 @@
 import { motion } from 'framer-motion'
 import { Calendar, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { fetchOrders } from '../api/orders'
 import { formatDate, formatPrice } from '../api/client'
+import Badge from '../components/Badge'
+import Button from '../components/Button'
+import EmptyState from '../components/EmptyState'
+import Skeleton from '../components/Skeleton'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import type { Order } from '../types'
@@ -11,6 +15,7 @@ import type { Order } from '../types'
 export default function OrdersPage() {
   const { isAuthenticated } = useAuth()
   const { t } = useLanguage()
+  const navigate = useNavigate()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -18,7 +23,7 @@ export default function OrdersPage() {
     if (!isAuthenticated) return
     fetchOrders()
       .then(setOrders)
-      .catch(console.error)
+      .catch(() => setOrders([]))
       .finally(() => setLoading(false))
   }, [isAuthenticated])
 
@@ -27,84 +32,97 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold text-white">{t('orders.title')}</h1>
-      <p className="mt-2 text-gray-400">{t('orders.subtitle')}</p>
+    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        {t('orders.title')}
+      </h1>
+      <p className="mt-1.5 text-sm text-content-muted">{t('orders.subtitle')}</p>
 
       {loading ? (
-        <div className="mt-8 space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl bg-surface-card" />
+        <div className="mt-7 space-y-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} className="h-36" rounded="xl" />
           ))}
         </div>
       ) : orders.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-12 rounded-2xl border border-brand-500/10 bg-surface-card p-12 text-center"
-        >
-          <Package className="mx-auto h-16 w-16 text-brand-500/40" />
-          <p className="mt-4 text-gray-400">{t('orders.empty')}</p>
-          <Link
-            to="/"
-            className="mt-4 inline-block text-brand-400 hover:text-brand-300"
+        <div className="mt-12">
+          <EmptyState
+            icon={Package}
+            title={t('orders.empty')}
+            description={t('orders.emptyText')}
           >
-            {t('orders.startShopping')}
-          </Link>
-        </motion.div>
+            <Button onClick={() => navigate('/')}>
+              {t('orders.startShopping')}
+            </Button>
+          </EmptyState>
+        </div>
       ) : (
-        <div className="mt-8 space-y-4">
-          {orders.map((order, i) => (
-            <motion.div
+        <ul className="mt-7 space-y-3">
+          {orders.map((order, index) => (
+            <motion.li
               key={order.id}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="rounded-2xl border border-brand-500/10 bg-surface-card p-6"
+              transition={{
+                delay: Math.min(index, 6) * 0.04,
+                duration: 0.22,
+                ease: [0.25, 1, 0.5, 1],
+              }}
+              className="rounded-xl border border-line bg-surface p-5"
             >
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-semibold text-white">{t('orders.order')} #{order.id}</h2>
-                  <div className="mt-1 flex items-center gap-1.5 text-sm text-gray-500">
-                    <Calendar className="h-3.5 w-3.5" />
+                  <h2 className="text-sm font-bold tracking-tight">
+                    {t('orders.order')} #{order.id}
+                  </h2>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs text-content-subtle">
+                    <Calendar className="h-3.5 w-3.5" strokeWidth={1.75} />
                     {formatDate(order.created_at)}
-                  </div>
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold text-brand-400">
+                  <p className="text-lg font-bold tabular-nums tracking-tight">
                     {formatPrice(order.total_order_price)}
                   </p>
-                  <span
-                    className={`mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      order.is_paid
-                        ? 'bg-brand-500/15 text-brand-400'
-                        : 'bg-amber-500/15 text-amber-400'
-                    }`}
-                  >
-                    {order.is_paid ? t('orders.paid') : t('orders.pending')}
+                  <span className="mt-1.5 inline-block">
+                    <Badge tone={order.is_paid ? 'accent' : 'warn'}>
+                      {order.is_paid ? t('orders.paid') : t('orders.pending')}
+                    </Badge>
                   </span>
                 </div>
               </div>
 
-              <p className="mt-4 text-sm text-gray-400">
-                <span className="text-gray-500">{t('orders.address')} </span>
+              <p className="mt-4 text-sm text-content-muted">
+                <span className="text-content-subtle">{t('orders.address')} </span>
                 {order.address}
               </p>
 
-              <ul className="mt-4 space-y-2 border-t border-brand-500/10 pt-4">
+              <ul className="mt-4 space-y-2 border-t border-line pt-4">
                 {order.items.map((item) => (
-                  <li key={item.id} className="flex justify-between text-sm">
-                    <span className="text-gray-300">
+                  <li
+                    key={item.id}
+                    className="flex items-baseline justify-between gap-4 text-sm"
+                  >
+                    <span className="min-w-0 text-content-muted">
                       {item.product_name} × {item.quantity}
                     </span>
-                    <span className="text-gray-400">{formatPrice(item.total_price)}</span>
+                    <span className="shrink-0 tabular-nums text-content">
+                      {formatPrice(item.total_price)}
+                    </span>
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </motion.li>
           ))}
-        </div>
+        </ul>
       )}
+
+      <Link
+        to="/"
+        className="mt-8 inline-block text-xs text-content-subtle transition-colors hover:text-content-muted"
+      >
+        {t('cart.browseProducts')}
+      </Link>
     </div>
   )
 }

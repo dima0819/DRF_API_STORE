@@ -39,11 +39,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               initial={{ opacity: 0, x: 80, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 80, scale: 0.9 }}
-              className="flex items-center gap-3 rounded-xl border border-brand-500/20 bg-surface-card px-4 py-3 shadow-xl shadow-black/30"
+              className="flex items-center gap-3 rounded-xl border border-line bg-raised px-4 py-3 shadow-high"
             >
-              <CheckCircle className="h-5 w-5 shrink-0 text-brand-400" />
-              <span className="text-sm font-medium text-white">{toast.message}</span>
-              <button onClick={() => dismiss(toast.id)} className="text-gray-500 hover:text-white">
+              <CheckCircle className="h-5 w-5 shrink-0 text-accent-400" />
+              <span className="text-sm font-medium text-content">{toast.message}</span>
+              <button onClick={() => dismiss(toast.id)} className="text-content-subtle transition-colors hover:text-content">
                 <X className="h-4 w-4" />
               </button>
             </motion.div>

@@ -6,21 +6,29 @@ export default function Footer() {
   const { t } = useLanguage()
 
   return (
-    <footer className="mt-auto border-t border-brand-500/10 bg-surface-light">
-      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6 lg:px-8">
+    <footer className="mt-auto border-t border-line">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-4 py-9 sm:flex-row sm:justify-between sm:px-6">
         <div className="flex items-center gap-2">
-          <ShoppingBag className="h-5 w-5 text-brand-500" />
-          <span className="font-semibold text-gray-300">
-            Motion<span className="text-brand-400">Gear</span>
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-raised text-accent-400">
+            <ShoppingBag className="h-4 w-4" strokeWidth={2} />
+          </span>
+          <span className="text-sm font-semibold">
+            Motion<span className="text-accent-400">Gear</span>
           </span>
         </div>
-        <p className="text-sm text-gray-500">
+
+        <p className="order-3 text-xs text-content-subtle sm:order-none">
           © {new Date().getFullYear()} MotionGear — {t('footer.tagline')}
         </p>
-        <div className="flex gap-4 text-sm text-gray-500">
-          <Link to="/" className="hover:text-brand-400 transition-colors">{t('footer.categories')}</Link>
-          <Link to="/koszyk" className="hover:text-brand-400 transition-colors">{t('nav.cart')}</Link>
-        </div>
+
+        <nav className="flex gap-5 text-xs text-content-muted">
+          <Link to="/" className="transition-colors hover:text-accent-300">
+            {t('footer.categories')}
+          </Link>
+          <Link to="/koszyk" className="transition-colors hover:text-accent-300">
+            {t('nav.cart')}
+          </Link>
+        </nav>
       </div>
     </footer>
   )

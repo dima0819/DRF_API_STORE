@@ -4,6 +4,7 @@ import OrdersPage from '../pages/OrdersPage'
 import { Providers } from './utils'
 import { authenticate, makeOrder } from './fixtures'
 import { fetchOrders } from '../api/orders'
+import { setStoredLang } from '../i18n/translations'
 
 vi.mock('../api/orders', () => ({
   createOrder: vi.fn(),
@@ -60,8 +61,33 @@ describe('OrdersPage', () => {
 
     renderOrders()
 
+    expect(await screen.findByText('Brak zamówień')).toBeInTheDocument()
     expect(
-      await screen.findByText('Nie masz jeszcze żadnych zamówień.'),
+      screen.getByRole('button', { name: 'Rozpocznij zakupy' }),
     ).toBeInTheDocument()
+  })
+
+  it('still renders an order whose timestamp is missing', async () => {
+    authenticate()
+    vi.mocked(fetchOrders).mockResolvedValue([
+      makeOrder({ id: 9, created_at: '' as unknown as string }),
+    ])
+
+    renderOrders()
+
+    expect(await screen.findByText(/#9/)).toBeInTheDocument()
+  })
+
+  it('still renders an order with a malformed timestamp in English', async () => {
+    setStoredLang('en')
+    authenticate()
+    vi.mocked(fetchOrders).mockResolvedValue([
+      makeOrder({ id: 11, created_at: 'not-a-date' }),
+    ])
+
+    renderOrders()
+
+    expect(await screen.findByText(/#11/)).toBeInTheDocument()
+    setStoredLang('pl')
   })
 })
