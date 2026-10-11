@@ -16,7 +16,7 @@ function LanguageSwitcher() {
     <div
       role="group"
       aria-label="Language"
-      className="flex items-center gap-0.5 rounded-lg bg-raised p-0.5"
+      className="flex shrink-0 items-center gap-0.5 rounded-lg bg-raised p-0.5"
     >
       {LANGUAGES.map((option) => (
         <button
@@ -24,7 +24,7 @@ function LanguageSwitcher() {
           type="button"
           onClick={() => setLang(option)}
           aria-pressed={lang === option}
-          className={`rounded-md px-2 py-1 text-2xs font-bold uppercase tracking-wide transition-colors duration-150 ${
+          className={`rounded-md px-1.5 py-1 text-2xs font-bold uppercase tracking-wide transition-colors duration-150 sm:px-2 ${
             lang === option
               ? 'bg-accent-400 text-accent-ink'
               : 'text-content-subtle hover:text-content'
@@ -44,7 +44,7 @@ function CartButton({ count }: { count: number }) {
     <Link
       to="/koszyk"
       aria-label={`${t('nav.cart')}${count > 0 ? ` (${count})` : ''}`}
-      className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-raised text-content-muted transition-colors duration-150 hover:bg-overlay hover:text-content"
+      className="relative flex h-10 w-9 shrink-0 items-center justify-center rounded-lg bg-raised text-content-muted transition-colors duration-150 hover:bg-overlay hover:text-content sm:w-10"
     >
       <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.75} />
       <AnimatePresence>
@@ -90,16 +90,16 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-ink/85 backdrop-blur-xl">
-      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-4 sm:gap-4 sm:px-6">
         <Link
           to="/"
-          className="flex shrink-0 items-center gap-2.5"
+          className="flex min-w-0 items-center gap-2 sm:gap-2.5"
           onClick={() => setMobileOpen(false)}
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-400 text-accent-ink">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-400 text-accent-ink">
             <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={2.25} />
           </span>
-          <span className="text-base font-bold tracking-tight">
+          <span className="truncate text-base font-bold tracking-tight">
             Motion<span className="text-accent-400">Gear</span>
           </span>
         </Link>
@@ -149,7 +149,7 @@ export default function Navbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex shrink-0 items-center gap-1 md:hidden">
           <LanguageSwitcher />
           <CartButton count={itemCount} />
           <button
@@ -157,7 +157,7 @@ export default function Navbar() {
             onClick={() => setMobileOpen((open) => !open)}
             aria-label="Menu"
             aria-expanded={mobileOpen}
-            className="flex h-10 w-10 items-center justify-center rounded-lg bg-raised text-content-muted transition-colors hover:text-content"
+            className="flex h-10 w-9 shrink-0 items-center justify-center rounded-lg bg-raised text-content-muted transition-colors hover:text-content sm:w-10"
           >
             {mobileOpen ? (
               <X className="h-[18px] w-[18px]" />

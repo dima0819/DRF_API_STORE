@@ -67,6 +67,33 @@ describe('CartContext', () => {
     expect(vi.mocked(fetchCart).mock.calls.length).toBe(callsBefore + 1)
   })
 
+  it('shows the new quantity immediately, before the server responds', async () => {
+    authenticate()
+    vi.mocked(fetchCart).mockResolvedValue(
+      makeCart({ items: [makeCartItem({ id: 9, quantity: 1 })] }),
+    )
+    let zwolnijSerwer: () => void = () => {}
+    vi.mocked(updateCartItem).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          zwolnijSerwer = () => resolve(makeCartItem({ id: 9, quantity: 3 }))
+        }),
+    )
+
+    const { result } = renderHook(() => useCart(), { wrapper: Providers })
+    await waitFor(() => expect(result.current.itemCount).toBe(1))
+
+    act(() => {
+      void result.current.updateQuantity(9, 3)
+    })
+
+    await waitFor(() => expect(result.current.itemCount).toBe(3))
+
+    await act(async () => {
+      zwolnijSerwer()
+    })
+  })
+
   it('updateQuantity with 0 removes the item instead of patching', async () => {
     authenticate()
     vi.mocked(fetchCart).mockResolvedValue(makeCart())

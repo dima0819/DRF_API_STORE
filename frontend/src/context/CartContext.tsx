@@ -33,26 +33,55 @@ const CartContext = createContext<CartContextValue | null>(null)
 
 const emptyCart: Cart = { id: 0, items: [], total_cart_price: '0' }
 
+function sumujKoszyk(items: Cart['items']): string {
+  return items
+    .reduce((sum, item) => sum + (parseFloat(item.total_price) || 0), 0)
+    .toFixed(2)
+}
+
+/** Cart with one item's quantity changed, recomputed locally. */
+function zeZmienionaIloscia(cart: Cart, itemId: number, quantity: number): Cart {
+  const items = cart.items
+    .map((item) => {
+      if (item.id !== itemId) return item
+      const cena = parseFloat(item.product.price) || 0
+      return { ...item, quantity, total_price: (cena * quantity).toFixed(2) }
+    })
+    .filter((item) => item.quantity > 0)
+  return { ...cart, items, total_cart_price: sumujKoszyk(items) }
+}
+
+/** Cart without the given item, recomputed locally. */
+function bezPozycji(cart: Cart, itemId: number): Cart {
+  const items = cart.items.filter((item) => item.id !== itemId)
+  return { ...cart, items, total_cart_price: sumujKoszyk(items) }
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth()
   const [cart, setCart] = useState<Cart | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const refreshCart = useCallback(async () => {
-    if (!isAuthenticated) {
-      setCart(null)
-      return
-    }
-    setIsLoading(true)
-    try {
-      const data = await fetchCart()
-      setCart(data)
-    } catch {
-      setCart(emptyCart)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [isAuthenticated])
+  // `silent` keeps the already-rendered cart on screen while it re-syncs, so a
+  // quantity change never blanks the list into skeletons.
+  const refreshCart = useCallback(
+    async (silent = false) => {
+      if (!isAuthenticated) {
+        setCart(null)
+        return
+      }
+      if (!silent) setIsLoading(true)
+      try {
+        const data = await fetchCart()
+        setCart(data)
+      } catch {
+        if (!silent) setCart(emptyCart)
+      } finally {
+        if (!silent) setIsLoading(false)
+      }
+    },
+    [isAuthenticated],
+  )
 
   useEffect(() => {
     refreshCart()
@@ -61,27 +90,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addToCart = useCallback(
     async (productId: number, quantity = 1) => {
       await apiAddToCart(productId, quantity)
-      await refreshCart()
+      await refreshCart(true)
     },
     [refreshCart],
   )
 
   const updateQuantity = useCallback(
     async (itemId: number, quantity: number) => {
-      if (quantity <= 0) {
-        await removeCartItem(itemId)
-      } else {
-        await updateCartItem(itemId, quantity)
+      setCart((prev) => (prev ? zeZmienionaIloscia(prev, itemId, quantity) : prev))
+      try {
+        if (quantity <= 0) {
+          await removeCartItem(itemId)
+        } else {
+          await updateCartItem(itemId, quantity)
+        }
+      } finally {
+        await refreshCart(true)
       }
-      await refreshCart()
     },
     [refreshCart],
   )
 
   const removeItem = useCallback(
     async (itemId: number) => {
-      await removeCartItem(itemId)
-      await refreshCart()
+      setCart((prev) => (prev ? bezPozycji(prev, itemId) : prev))
+      try {
+        await removeCartItem(itemId)
+      } finally {
+        await refreshCart(true)
+      }
     },
     [refreshCart],
   )

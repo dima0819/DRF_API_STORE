@@ -64,7 +64,7 @@ export default function ProductCard({
         )}
       </Link>
 
-      <div className="flex flex-1 flex-col gap-1 p-4">
+      <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
         <span className="text-2xs font-semibold uppercase tracking-[0.1em] text-content-subtle">
           {product.category}
         </span>
@@ -77,8 +77,8 @@ export default function ProductCard({
           </Link>
         </h3>
 
-        <div className="mt-auto flex items-end justify-between gap-3 pt-4">
-          <span className="text-lg font-bold tabular-nums tracking-tight text-content">
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-3 pt-4">
+          <span className="min-w-0 text-base font-bold tabular-nums tracking-tight text-content sm:text-lg">
             {formatPrice(product.price)}
           </span>
           <motion.button
@@ -89,7 +89,7 @@ export default function ProductCard({
               onAddToCart?.()
             }}
             disabled={!inStock}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-raised text-content-muted transition-colors hover:bg-accent-400 hover:text-accent-ink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-raised disabled:hover:text-content-muted"
+            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-raised text-content-muted transition-colors hover:bg-accent-400 hover:text-accent-ink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-raised disabled:hover:text-content-muted sm:h-10 sm:w-10"
             aria-label={t('product.addToCart')}
           >
             <Plus className="h-4 w-4" strokeWidth={2.5} />
